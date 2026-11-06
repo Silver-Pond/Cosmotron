@@ -60,14 +60,23 @@ class Player:
         self.rotation = 0.0
 
         # Movement speed
-        self.speed = 8.0
+        self.speed = 5.0
 
-        # Collision settings
-        self.collision_radius_x = 0.3
-        self.collision_radius_z = 0.3
+        # Automatic forward movement
+        self.forward_speed = 1.5
+
+        # Forward movement acceleration (optional)
+        self.forward_acceleration = 0.1
+
+        # Maximum forward speed
+        self.max_forward_speed = 2.5
 
         # Reference to level map
         self.level_map = None
+
+        # Collision settings
+        self.collision_radius_x = 0.75
+        self.collision_radius_z = 0.75
 
         # =====================================
         # PLAYER TEXTURE
@@ -124,8 +133,8 @@ class Player:
 
         self.bullets = []
 
-        self.bullet_speed = 35.0
-        self.bullet_cooldown = 0.3
+        self.bullet_speed = 40.0
+        self.bullet_cooldown = 0.5
         self.bullet_timer = 0.0
         self.bullet_scale = 0.2
 
@@ -193,37 +202,26 @@ class Player:
     def set_level_map(self, level_map):
         self.level_map = level_map
 
-    # WALL COLLISION DETECTION
-    def move_with_collision(self, dx, dz):
+    # PLAYER AREA RESTRICTION
+    def restrict_movement(self):
 
-        # If no level map exists, allow movement
         if self.level_map is None:
-            self.x += dx
-            self.z += dz
-
             return
 
-        # CHECK X-AXIS COLLISION
-        new_x = self.x + dx
+        # Get arena boundaries
+        half_width = (self.level_map.columns * self.level_map.cell_size) / 2
+        half_depth = (self.level_map.rows * self.level_map.cell_size) / 2
 
-        if not self.level_map.check_wall_collision(
-                new_x,
-                self.z,
-                self.collision_radius_x,
-                self.collision_radius_z
-        ):
-            self.x = new_x
+        # Calculate movement boundaries
+        min_x = -half_width + self.collision_radius_x
+        max_x = half_width - self.collision_radius_x
 
-        # CHECK Z-AXIS COLLISION
-        new_z = self.z + dz
+        min_z = -half_depth + self.collision_radius_z
+        max_z = half_depth - self.collision_radius_z
 
-        if not self.level_map.check_wall_collision(
-                self.x,
-                new_z,
-                self.collision_radius_x,
-                self.collision_radius_z
-        ):
-            self.z = new_z
+        # Restrict player position
+        self.x = max(min_x, min(self.x, max_x))
+        self.z = max(min_z, min(self.z, max_z))
 
     # Update code
     def update(self, keys, delta_time):
@@ -232,20 +230,30 @@ class Player:
 
         target_rotation = 0
 
-        dx = 0
-        dz = 0
+        # Gradually increase forward speed
+        self.forward_speed += (
+                self.forward_acceleration * delta_time
+        )
+
+        # Limit maximum speed
+        self.forward_speed = min(
+            self.forward_speed, self.max_forward_speed
+        )
+
+        # Move forward along negative Z axis
+        self.z -= self.forward_speed * delta_time
 
         # Horizontal movement
         if keys[pygame.K_a]:
-            dx -= movement
+            self.x -= movement
             target_rotation = 10
 
         elif keys[pygame.K_d]:
-            dx += movement
+            self.x += movement
             target_rotation = -10
 
-        # Move player with wall collision
-        self.move_with_collision(dx, dz)
+        # Restrict movement to arena
+        self.restrict_movement()
 
         # Smoothly interpolate rotation
         tilt_speed = 8
@@ -266,7 +274,7 @@ class Player:
         # Remove bullets that have traveled too far
         self.bullets = [
             bullet for bullet in self.bullets
-            if bullet["z"] > -50
+            if bullet["z"] > -30
         ]
 
     # Update camera code
