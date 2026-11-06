@@ -136,7 +136,6 @@ map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
-
 class LevelMap:
 
     def __init__(self, level_data = map):
@@ -167,7 +166,7 @@ class LevelMap:
         self.render_distance_ahead = 40
 
         # Number of rows rendered behind player
-        self.render_distance_behind = 3
+        self.render_distance_behind = 4
 
         # Current player position
         self.player_z = 0.0

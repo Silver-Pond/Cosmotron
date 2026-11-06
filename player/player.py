@@ -137,6 +137,7 @@ class Player:
         self.bullet_cooldown = 0.5
         self.bullet_timer = 0.0
         self.bullet_scale = 0.2
+        self.max_bullets = 10
 
         # =====================================
         # DEBUG INFORMATION
@@ -189,12 +190,11 @@ class Player:
     # Shoot code
     def shoot(self):
 
+        if len(self.bullets) >= self.max_bullets:
+            return
+
         # Spawn bullet at spaceship position
-        bullet = {
-            "x": self.x,
-            "y": self.y,
-            "z": self.z - 1.5
-        }
+        bullet = {"x": self.x, "y": self.y, "z": self.z - 1.5}
 
         self.bullets.append(bullet)
 
