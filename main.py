@@ -32,14 +32,17 @@ gluPerspective(45, WIDTH / HEIGHT, 0.1, 100.0)
 
 glMatrixMode(GL_MODELVIEW)
 
+# Create level
+level = LevelMap()
+
 # Create player spacecraft
 player = Player(
     model_path="assets/player/pyro_can.obj",
     texture_path="assets/player/pyro_can.png"
 )
 
-# Create level
-level = LevelMap()
+# Connect level map to player
+player.set_level_map(level)
 
 clock = pygame.time.Clock()
 

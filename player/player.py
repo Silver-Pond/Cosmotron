@@ -1,7 +1,6 @@
 import pygame
 import trimesh
 from OpenGL.raw.GLU import gluLookAt
-
 from PIL import Image
 from OpenGL.GL import *
 
@@ -63,6 +62,13 @@ class Player:
         # Movement speed
         self.speed = 8.0
 
+        # Collision settings
+        self.collision_radius_x = 0.3
+        self.collision_radius_z = 0.3
+
+        # Reference to level map
+        self.level_map = None
+
         # =====================================
         # PLAYER TEXTURE
         # =====================================
@@ -78,8 +84,8 @@ class Player:
 
         self.bullet_mesh = trimesh.load(
             "assets/player/bullet/bomber.obj",
-            force="mesh",
-            process=False
+            force = "mesh",
+            process = False
         )
 
         # Center bullet model
@@ -119,7 +125,7 @@ class Player:
         self.bullets = []
 
         self.bullet_speed = 35.0
-        self.bullet_cooldown = 0.2
+        self.bullet_cooldown = 0.3
         self.bullet_timer = 0.0
         self.bullet_scale = 0.2
 
@@ -169,7 +175,6 @@ class Player:
 
         # Test log
         print("Spaceship texture loaded successfully!")
-
         return texture_id
 
     # Shoot code
@@ -184,6 +189,42 @@ class Player:
 
         self.bullets.append(bullet)
 
+    # Set level map for collision detection
+    def set_level_map(self, level_map):
+        self.level_map = level_map
+
+    # WALL COLLISION DETECTION
+    def move_with_collision(self, dx, dz):
+
+        # If no level map exists, allow movement
+        if self.level_map is None:
+            self.x += dx
+            self.z += dz
+
+            return
+
+        # CHECK X-AXIS COLLISION
+        new_x = self.x + dx
+
+        if not self.level_map.check_wall_collision(
+                new_x,
+                self.z,
+                self.collision_radius_x,
+                self.collision_radius_z
+        ):
+            self.x = new_x
+
+        # CHECK Z-AXIS COLLISION
+        new_z = self.z + dz
+
+        if not self.level_map.check_wall_collision(
+                self.x,
+                new_z,
+                self.collision_radius_x,
+                self.collision_radius_z
+        ):
+            self.z = new_z
+
     # Update code
     def update(self, keys, delta_time):
 
@@ -191,14 +232,20 @@ class Player:
 
         target_rotation = 0
 
+        dx = 0
+        dz = 0
+
         # Horizontal movement
         if keys[pygame.K_a]:
-            self.x -= movement
+            dx -= movement
             target_rotation = 10
 
         elif keys[pygame.K_d]:
-            self.x += movement
+            dx += movement
             target_rotation = -10
+
+        # Move player with wall collision
+        self.move_with_collision(dx, dz)
 
         # Smoothly interpolate rotation
         tilt_speed = 8
@@ -216,10 +263,10 @@ class Player:
         for bullet in self.bullets:
             bullet["z"] -= self.bullet_speed * delta_time
 
-        # Remove bullets that have travelled too far
+        # Remove bullets that have traveled too far
         self.bullets = [
             bullet for bullet in self.bullets
-            if bullet["z"] > -200
+            if bullet["z"] > -50
         ]
 
     # Update camera code

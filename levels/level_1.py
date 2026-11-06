@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 
 # Level layout
-mapA = [
+map = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -48,10 +48,9 @@ mapA = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 ]
 
-
 class LevelMap:
 
-    def __init__(self, level_data = mapA):
+    def __init__(self, level_data = map):
 
         self.map = level_data
 
@@ -71,6 +70,10 @@ class LevelMap:
         # Arena colours
         self.floor_colour = (0.25, 0.035, 0.09)
 
+        # Cache wall positions
+        self.wall_positions = self.get_wall_positions()
+
+    # Draw floor code
     def draw_floor_tile(self, x, z):
 
         half = self.cell_size / 2
@@ -88,6 +91,7 @@ class LevelMap:
 
         glEnd()
 
+    # Draw cube code
     def draw_cube(self, x, y, z):
 
         half = self.cell_size / 2
@@ -135,6 +139,7 @@ class LevelMap:
 
         glEnd()
 
+    # Draw map code
     def draw(self):
 
         glDisable(GL_TEXTURE_2D)
@@ -197,6 +202,39 @@ class LevelMap:
                     walls.append((x, z))
 
         return walls
+
+    # WALL COLLISION DETECTION
+    def check_wall_collision(self, x, z, radius_x=0.3, radius_z=0.3):
+
+        half_wall = self.cell_size / 2
+
+        # Check every wall
+        for wall_x, wall_z in self.wall_positions:
+
+            # Wall boundaries
+            wall_min_x = wall_x - half_wall
+            wall_max_x = wall_x + half_wall
+
+            wall_min_z = wall_z - half_wall
+            wall_max_z = wall_z + half_wall
+
+            # Player boundaries
+            player_min_x = x - radius_x
+            player_max_x = x + radius_x
+
+            player_min_z = z - radius_z
+            player_max_z = z + radius_z
+
+            # Check for overlap
+            if (
+                    player_max_x > wall_min_x and
+                    player_min_x < wall_max_x and
+                    player_max_z > wall_min_z and
+                    player_min_z < wall_max_z
+            ):
+                return True
+
+        return False
 
 """
 REFERENCE LIST
