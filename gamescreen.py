@@ -14,11 +14,7 @@ def run():
     WIDTH = 1000
     HEIGHT = 700
 
-    pygame.display.set_mode(
-        (WIDTH, HEIGHT),
-        pygame.DOUBLEBUF | pygame.OPENGL
-    )
-
+    pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.OPENGL)
     pygame.display.set_caption("CosmoTron")
 
     # OpenGL settings

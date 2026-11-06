@@ -202,7 +202,7 @@ class Player:
     def set_level_map(self, level_map):
         self.level_map = level_map
 
-    # PLAYER AREA RESTRICTION
+    # Player area reestriction
     def restrict_movement(self):
 
         if self.level_map is None:
@@ -274,7 +274,7 @@ class Player:
         # Remove bullets that have traveled too far
         self.bullets = [
             bullet for bullet in self.bullets
-            if bullet["z"] > -30
+            if bullet["z"] > -50
         ]
 
     # Update camera code
