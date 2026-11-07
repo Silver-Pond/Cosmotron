@@ -1,5 +1,6 @@
 import pygame
 import trimesh
+
 from OpenGL.raw.GLU import gluLookAt
 from PIL import Image
 from OpenGL.GL import *
@@ -8,10 +9,7 @@ class Player:
 
     def __init__(self, model_path, texture_path=None):
 
-        # =====================================
         # LOAD PLAYER OBJ MODEL
-        # =====================================
-
         self.mesh = trimesh.load(
             model_path,
             force = "mesh",
@@ -40,18 +38,15 @@ class Player:
         if hasattr(self.mesh.visual, "uv"):
             self.uv_coordinates = self.mesh.visual.uv
 
-        # =====================================
         # CAMERA SETTINGS
-        # =====================================
-
         self.camera_distance = 6.0
         self.camera_height = 2.5
         self.camera_look_height = 0.5
 
-        # =====================================
-        # PLAYER POSITION
-        # =====================================
+        # PLAYER STATUS
+        self.alive = True
 
+        # PLAYER POSITION
         self.x = 0.0
         self.y = -2.5
         self.z = 300
@@ -78,19 +73,13 @@ class Player:
         self.collision_radius_x = 0.75
         self.collision_radius_z = 0.75
 
-        # =====================================
         # PLAYER TEXTURE
-        # =====================================
-
         self.texture_id = self.load_texture(
             texture_path if texture_path is not None
             else "assets/player/pyro_can.png"
         )
 
-        # =====================================
         # LOAD BULLET OBJ MODEL
-        # =====================================
-
         self.bullet_mesh = trimesh.load(
             "assets/player/bullet/bomber.obj",
             force = "mesh",
@@ -119,18 +108,12 @@ class Player:
         if hasattr(self.bullet_mesh.visual, "uv"):
             self.bullet_uv_coordinates = self.bullet_mesh.visual.uv
 
-        # =====================================
         # BULLET TEXTURE
-        # =====================================
-
         self.bullet_texture_id = self.load_texture(
             "assets/player/bullet/bomber.png"
         )
 
-        # =====================================
         # BULLET SETTINGS
-        # =====================================
-
         self.bullets = []
 
         self.bullet_speed = 40.0
@@ -139,10 +122,10 @@ class Player:
         self.bullet_scale = 0.2
         self.max_bullets = 10
 
-        # =====================================
-        # DEBUG INFORMATION
-        # =====================================
+        # Bullet collision radius
+        self.bullet_collision_radius = 0.15
 
+        # DEBUG INFORMATION
         print("Player UV:", self.uv_coordinates is not None)
         print("Bullet UV:", self.bullet_uv_coordinates is not None)
 
@@ -241,10 +224,7 @@ class Player:
             self.max_forward_speed
         )
 
-        # =====================================
         # PLAYER MOVEMENT AND COLLISION
-        # =====================================
-
         move_z = -self.forward_speed * delta_time
         move_x = 0
 
@@ -261,21 +241,13 @@ class Player:
             # Horizontal collision (X)
             new_x = self.x + move_x
 
-            if not self.level_map.collides_with_wall(
-                    new_x,
-                    self.z,
-                    self.collision_radius_x
-            ):
+            if not self.level_map.collides_with_wall(new_x, self.z, self.collision_radius_x):
                 self.x = new_x
 
             # Forward collision (Z)
             new_z = self.z + move_z
 
-            if not self.level_map.collides_with_wall(
-                    self.x,
-                    new_z,
-                    self.collision_radius_z
-            ):
+            if not self.level_map.collides_with_wall(self.x, new_z, self.collision_radius_z):
                 self.z = new_z
 
         else:
@@ -297,15 +269,45 @@ class Player:
             self.shoot()
             self.bullet_timer = self.bullet_cooldown
 
-        # Update bullets
+        # UPDATE BULLETS AND WALL COLLISIONS
+        active_bullets = []
+
         for bullet in self.bullets:
+
+            # Store previous position
+            previous_z = bullet["z"]
+
+            # Move bullet forward
             bullet["z"] -= self.bullet_speed * delta_time
 
-        # Remove bullets that have traveled too far
-        self.bullets = [
-            bullet for bullet in self.bullets
-            if bullet["z"] > -100
-        ]
+            # Check wall collision
+            hit_wall = False
+
+            if self.level_map is not None:
+
+                # Check the bullet's new position
+                if self.level_map.collides_with_wall(bullet["x"], bullet["z"], self.bullet_collision_radius):
+                    hit_wall = True
+
+                # Also check intermediate positions to reduce the chance of bullets passing through walls.
+                if not hit_wall:
+                    distance = abs(bullet["z"] - previous_z)
+                    steps = max(1, int(distance / (self.level_map.cell_size * 0.2)) + 1)
+
+                    for step in range(1, steps):
+
+                        check_z = previous_z + (bullet["z"] - previous_z) * (step / steps)
+
+                        if self.level_map.collides_with_wall(bullet["x"], check_z, self.bullet_collision_radius):
+                            hit_wall = True
+                            break
+
+            # Keep bullet only if it has not hit a wall and has not traveled beyond its range.
+            if not hit_wall and bullet["z"] > -200:
+                active_bullets.append(bullet)
+
+        # Replace bullet list with surviving bullets
+        self.bullets = active_bullets
 
     # Update camera code
     def update_camera(self):

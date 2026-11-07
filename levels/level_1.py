@@ -310,17 +310,11 @@ class LevelMap:
 
             self.wall_cells.add((row, column))
 
-    # =====================================
     # UPDATE PLAYER POSITION
-    # =====================================
-
     def update(self, player_z):
         self.player_z = player_z
 
-    # =====================================
     # GET PLAYER MAP ROW
-    # =====================================
-
     def get_player_row(self):
 
         row = int(
@@ -332,10 +326,7 @@ class LevelMap:
 
         return max(0, min(self.rows - 1, row))
 
-    # =====================================
     # GET VISIBLE MAP ROWS
-    # =====================================
-
     def get_visible_rows(self):
 
         player_row = self.get_player_row()
@@ -345,10 +336,7 @@ class LevelMap:
 
         return range(start_row, end_row)
 
-    # =====================================
     # DRAW FLOOR TILE
-    # =====================================
-
     def draw_floor_tile(self, x, z):
 
         half = self.cell_size / 2
@@ -366,10 +354,7 @@ class LevelMap:
 
         glEnd()
 
-    # =====================================
-    # LOAD ANOMALY TEXTURE
-    # =====================================
-
+    # Load Anomaly Texture
     def load_wall_texture(self):
 
         texture_path = os.path.join("assets", "anomaly.png")
@@ -423,10 +408,7 @@ class LevelMap:
 
         return texture
 
-    # =====================================
-    # DRAW WALL CUBE
-    # =====================================
-
+    # Draw wall cube
     def draw_cube(self, x, y, z):
 
         half_width = self.wall_width / 2
@@ -486,10 +468,7 @@ class LevelMap:
 
         glDisable(GL_TEXTURE_2D)
 
-    # =====================================
-    # DRAW VISIBLE MAP
-    # =====================================
-
+    # Draw Visible Map
     def draw(self):
 
         glDisable(GL_TEXTURE_2D)
@@ -513,10 +492,7 @@ class LevelMap:
                         z
                     )
 
-    # =====================================
-    # GET WALL POSITIONS
-    # =====================================
-
+    # Get Wall Positions
     def get_wall_positions(self):
 
         walls = []
@@ -539,6 +515,7 @@ class LevelMap:
 
         return walls
 
+    # Player wall collider code
     def collides_with_wall(self, x, z, player_radius):
         """
         Checks horizontal collision against nearby wall cubes.
@@ -600,6 +577,7 @@ class LevelMap:
 
         return False
 
+    # Wall collider addition (player movement)
     def move_player(self, player, move_x, move_z):
         """
         Moves the player while preventing horizontal wall penetration.
