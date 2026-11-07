@@ -207,6 +207,7 @@ class Player:
         self.z = max(min_z, min(self.z, max_z))
 
     # Update code
+
     def update(self, keys, delta_time):
 
         movement = self.speed * delta_time
@@ -218,7 +219,7 @@ class Player:
                 self.forward_acceleration * delta_time
         )
 
-        # Limit maximum speed
+        # Limit maximum forward speed
         self.forward_speed = min(
             self.forward_speed,
             self.max_forward_speed
@@ -241,27 +242,35 @@ class Player:
             # Horizontal collision (X)
             new_x = self.x + move_x
 
-            if not self.level_map.collides_with_wall(new_x, self.z, self.collision_radius_x):
+            if not self.level_map.collides_with_wall(
+                    new_x, self.z, self.collision_radius_x
+            ):
                 self.x = new_x
 
             # Forward collision (Z)
             new_z = self.z + move_z
 
-            if not self.level_map.collides_with_wall(self.x, new_z, self.collision_radius_z):
+            if not self.level_map.collides_with_wall(
+                    self.x, new_z, self.collision_radius_z
+            ):
                 self.z = new_z
 
         else:
             self.x += move_x
             self.z += move_z
 
-        # Restrict movement to arena
+        # Restrict player movement to arena
         self.restrict_movement()
 
         # Smoothly interpolate rotation
         tilt_speed = 8
-        self.rotation += (target_rotation - self.rotation) * min(tilt_speed * delta_time, 1)
 
-        # Shooting cooldown
+        self.rotation += (
+                (target_rotation - self.rotation)
+                * min(tilt_speed * delta_time, 1)
+        )
+
+        # SHOOTING COOLDOWN
         self.bullet_timer -= delta_time
 
         # Shoot while SPACE is held
@@ -269,41 +278,71 @@ class Player:
             self.shoot()
             self.bullet_timer = self.bullet_cooldown
 
-        # UPDATE BULLETS AND WALL COLLISIONS
+        # UPDATE BULLETS, WALL AND TESSERACT COLLISIONS
         active_bullets = []
 
         for bullet in self.bullets:
 
-            # Store previous position
+            # Store previous bullet position
             previous_z = bullet["z"]
 
             # Move bullet forward
             bullet["z"] -= self.bullet_speed * delta_time
 
-            # Check wall collision
+            # CHECK TESSERACT COLLISION FIRST
+            hit_tesseract = self.check_tesseract_collision(
+                bullet,
+                previous_z
+            )
+
+            # CHECK WALL COLLISION
             hit_wall = False
 
-            if self.level_map is not None:
+            if not hit_tesseract and self.level_map is not None:
 
-                # Check the bullet's new position
-                if self.level_map.collides_with_wall(bullet["x"], bullet["z"], self.bullet_collision_radius):
+                # Check bullet's new position
+                if self.level_map.collides_with_wall(
+                        bullet["x"],
+                        bullet["z"],
+                        self.bullet_collision_radius
+                ):
                     hit_wall = True
 
-                # Also check intermediate positions to reduce the chance of bullets passing through walls.
+                # Check intermediate positions to prevent
+                # bullets passing through walls
                 if not hit_wall:
+
                     distance = abs(bullet["z"] - previous_z)
-                    steps = max(1, int(distance / (self.level_map.cell_size * 0.2)) + 1)
+
+                    steps = max(
+                        1,
+                        int(
+                            distance /
+                            (self.level_map.cell_size * 0.2)
+                        ) + 1
+                    )
 
                     for step in range(1, steps):
 
-                        check_z = previous_z + (bullet["z"] - previous_z) * (step / steps)
+                        check_z = previous_z + (
+                                (bullet["z"] - previous_z)
+                                * (step / steps)
+                        )
 
-                        if self.level_map.collides_with_wall(bullet["x"], check_z, self.bullet_collision_radius):
+                        if self.level_map.collides_with_wall(
+                                bullet["x"],
+                                check_z,
+                                self.bullet_collision_radius
+                        ):
                             hit_wall = True
                             break
 
-            # Keep bullet only if it has not hit a wall and has not traveled beyond its range.
-            if not hit_wall and bullet["z"] > -200:
+            # KEEP SURVIVING BULLETS
+            if (
+                    not hit_wall
+                    and not hit_tesseract
+                    and bullet["z"] > -200
+            ):
                 active_bullets.append(bullet)
 
         # Replace bullet list with surviving bullets
@@ -424,6 +463,42 @@ class Player:
         # Disable bullet texture
         glBindTexture(GL_TEXTURE_2D, 0)
         glDisable(GL_TEXTURE_2D)
+
+    # Tesseract bullet collision code
+    def check_tesseract_collision(self, bullet, previous_z):
+
+        if self.level_map is None:
+            return False
+
+        for tesseract in self.level_map.tesseracts:
+
+            dx = bullet["x"] - tesseract.x
+            dy = bullet["y"] - tesseract.y
+
+            # Check bullet's movement along Z
+            min_z = min(previous_z, bullet["z"])
+            max_z = max(previous_z, bullet["z"])
+
+            closest_z = max(
+                min_z,
+                min(tesseract.z, max_z)
+            )
+
+            dz = closest_z - tesseract.z
+
+            distance = (dx ** 2 + dy ** 2 + dz ** 2) ** 0.5
+
+            collision_distance = (
+                    self.bullet_collision_radius +
+                    tesseract.radius
+            )
+
+            if distance < collision_distance:
+                self.level_map.tesseracts.remove(tesseract)
+
+                return True
+
+        return False
 
     # Cleanup code
     def cleanup(self):
