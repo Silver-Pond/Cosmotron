@@ -202,7 +202,7 @@ class Player:
     def set_level_map(self, level_map):
         self.level_map = level_map
 
-    # Player area reestriction
+    # Player area restriction
     def restrict_movement(self):
 
         if self.level_map is None:
@@ -237,20 +237,50 @@ class Player:
 
         # Limit maximum speed
         self.forward_speed = min(
-            self.forward_speed, self.max_forward_speed
+            self.forward_speed,
+            self.max_forward_speed
         )
 
-        # Move forward along negative Z axis
-        self.z -= self.forward_speed * delta_time
+        # =====================================
+        # PLAYER MOVEMENT AND COLLISION
+        # =====================================
 
-        # Horizontal movement
+        move_z = -self.forward_speed * delta_time
+        move_x = 0
+
         if keys[pygame.K_a]:
-            self.x -= movement
+            move_x = -movement
             target_rotation = 10
 
         elif keys[pygame.K_d]:
-            self.x += movement
+            move_x = movement
             target_rotation = -10
+
+        if self.level_map is not None:
+
+            # Horizontal collision (X)
+            new_x = self.x + move_x
+
+            if not self.level_map.collides_with_wall(
+                    new_x,
+                    self.z,
+                    self.collision_radius_x
+            ):
+                self.x = new_x
+
+            # Forward collision (Z)
+            new_z = self.z + move_z
+
+            if not self.level_map.collides_with_wall(
+                    self.x,
+                    new_z,
+                    self.collision_radius_z
+            ):
+                self.z = new_z
+
+        else:
+            self.x += move_x
+            self.z += move_z
 
         # Restrict movement to arena
         self.restrict_movement()
@@ -274,7 +304,7 @@ class Player:
         # Remove bullets that have traveled too far
         self.bullets = [
             bullet for bullet in self.bullets
-            if bullet["z"] > -50
+            if bullet["z"] > -100
         ]
 
     # Update camera code

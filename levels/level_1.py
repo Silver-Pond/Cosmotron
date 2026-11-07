@@ -1,8 +1,26 @@
+from PIL import Image
 from OpenGL.GL import *
+from OpenGL.GLU import *
+import os
 
 # Level layout
 map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -213,12 +231,15 @@ class LevelMap:
         # MAP SETTINGS
         # =====================================
 
-        self.cell_size = 0.4
+        # Each floor tile and wall occupies a 64x64 tile area
+        self.cell_size = 0.64
 
         self.floor_y = -2.8
 
-        self.wall_height = 0.7
-        self.wall_depth = self.cell_size
+        # Wall dimensions
+        self.wall_width = 0.64
+        self.wall_height = 0.64
+        self.wall_depth = 0.64
 
         self.floor_colour = (0.25, 0.035, 0.09)
 
@@ -237,6 +258,21 @@ class LevelMap:
 
         # Cache wall positions
         self.wall_positions = self.get_wall_positions()
+
+        # Load anomaly wall texture
+        self.wall_texture = self.load_wall_texture()
+
+        self.wall_cells = set()
+
+        for wall_x, wall_z in self.wall_positions:
+            column = round(
+                wall_x / self.cell_size + (self.columns - 1) / 2
+            )
+            row = round(
+                wall_z / self.cell_size + (self.rows - 1) / 2
+            )
+
+            self.wall_cells.add((row, column))
 
     # =====================================
     # UPDATE PLAYER POSITION
@@ -287,12 +323,69 @@ class LevelMap:
 
         glBegin(GL_QUADS)
 
-        glVertex3f(x-half, y, z-half)
-        glVertex3f(x+half, y, z-half)
-        glVertex3f(x+half, y, z+half)
-        glVertex3f(x-half, y, z+half)
+        glVertex3f(x - half, y, z - half)
+        glVertex3f(x + half, y, z - half)
+        glVertex3f(x + half, y, z + half)
+        glVertex3f(x - half, y, z + half)
 
         glEnd()
+
+    # =====================================
+    # LOAD ANOMALY TEXTURE
+    # =====================================
+
+    def load_wall_texture(self):
+
+        texture_path = os.path.join("assets", "anomaly.png")
+
+        image = Image.open(texture_path).convert("RGBA")
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+
+        image_data = image.tobytes()
+
+        texture = glGenTextures(1)
+
+        glBindTexture(GL_TEXTURE_2D, texture)
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER,
+            GL_LINEAR
+        )
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MAG_FILTER,
+            GL_LINEAR
+        )
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_S,
+            GL_REPEAT
+        )
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_T,
+            GL_REPEAT
+        )
+
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            image.width,
+            image.height,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            image_data
+        )
+
+        glBindTexture(GL_TEXTURE_2D, 0)
+
+        return texture
 
     # =====================================
     # DRAW WALL CUBE
@@ -300,50 +393,62 @@ class LevelMap:
 
     def draw_cube(self, x, y, z):
 
-        half = self.cell_size / 2
-        height = self.wall_height / 2
-        depth = self.wall_depth / 2
+        half_width = self.wall_width / 2
+        half_height = self.wall_height / 2
+        half_depth = self.wall_depth / 2
 
         vertices = [
-            (x-half, y-height, z-depth),
-            (x+half, y-height, z-depth),
-            (x+half, y+height, z-depth),
-            (x-half, y+height, z-depth),
+            # Front
+            (x - half_width, y - half_height, z - half_depth),
+            (x + half_width, y - half_height, z - half_depth),
+            (x + half_width, y + half_height, z - half_depth),
+            (x - half_width, y + half_height, z - half_depth),
 
-            (x-half, y-height, z+depth),
-            (x+half, y-height, z+depth),
-            (x+half, y+height, z+depth),
-            (x-half, y+height, z+depth)
+            # Back
+            (x - half_width, y - half_height, z + half_depth),
+            (x + half_width, y - half_height, z + half_depth),
+            (x + half_width, y + half_height, z + half_depth),
+            (x - half_width, y + half_height, z + half_depth)
         ]
 
         faces = [
-            (0, 1, 2, 3),
-            (4, 5, 6, 7),
-            (0, 4, 7, 3),
-            (1, 5, 6, 2),
-            (0, 1, 5, 4),
-            (3, 2, 6, 7)
+            (0, 1, 2, 3),  # Front
+            (4, 5, 6, 7),  # Back
+            (0, 4, 7, 3),  # Left
+            (1, 5, 6, 2),  # Right
+            (0, 1, 5, 4),  # Bottom
+            (3, 2, 6, 7)  # Top
         ]
 
-        colours = [
-            (0.12, 0.16, 0.28),
-            (0.20, 0.25, 0.40),
-            (0.08, 0.11, 0.20),
-            (0.15, 0.20, 0.32),
-            (0.06, 0.09, 0.16),
-            (0.25, 0.30, 0.45)
+        # Texture coordinates
+        tex_coords = [
+            (0.0, 0.0),
+            (1.0, 0.0),
+            (1.0, 1.0),
+            (0.0, 1.0)
         ]
+
+        # Enable texture
+        glEnable(GL_TEXTURE_2D)
+
+        glBindTexture(GL_TEXTURE_2D, self.wall_texture)
+
+        glColor3f(1.0, 1.0, 1.0)
 
         glBegin(GL_QUADS)
 
-        for i, face in enumerate(faces):
+        for face in faces:
 
-            glColor3fv(colours[i])
+            for i, vertex in enumerate(face):
+                glTexCoord2f(*tex_coords[i])
 
-            for vertex in face:
                 glVertex3fv(vertices[vertex])
 
         glEnd()
+
+        glBindTexture(GL_TEXTURE_2D, 0)
+
+        glDisable(GL_TEXTURE_2D)
 
     # =====================================
     # DRAW VISIBLE MAP
@@ -354,7 +459,6 @@ class LevelMap:
         glDisable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
 
-        # Only render selected map rows
         visible_rows = self.get_visible_rows()
 
         for row in visible_rows:
@@ -364,12 +468,14 @@ class LevelMap:
                 x = (column - (self.columns - 1) / 2) * self.cell_size
                 z = (row - (self.rows - 1) / 2) * self.cell_size
 
-                # Draw floor
                 self.draw_floor_tile(x, z)
 
-                # Draw wall if tile contains a wall
                 if self.map[row][column] == 1:
-                    self.draw_cube(x, self.floor_y + self.wall_height / 2, z)
+                    self.draw_cube(
+                        x,
+                        self.floor_y + self.wall_height / 2,
+                        z
+                    )
 
     # =====================================
     # GET WALL POSITIONS
@@ -396,6 +502,93 @@ class LevelMap:
                     walls.append((x, z))
 
         return walls
+
+    def collides_with_wall(self, x, z, player_radius):
+        """
+        Checks horizontal collision against nearby wall cubes.
+        Only checks the X and Z sides.
+        Ignores the top and bottom of walls.
+        """
+
+        half_wall = self.cell_size / 2
+
+        # Only inspect nearby grid cells.
+        reach = int(player_radius / self.cell_size) + 1
+
+        center_column = round(
+            x / self.cell_size + (self.columns - 1) / 2
+        )
+
+        center_row = round(
+            z / self.cell_size + (self.rows - 1) / 2
+        )
+
+        radius_squared = player_radius * player_radius
+
+        for row in range(
+                center_row - reach,
+                center_row + reach + 1
+        ):
+            for column in range(
+                    center_column - reach,
+                    center_column + reach + 1
+            ):
+
+                if (row, column) not in self.wall_cells:
+                    continue
+
+                wall_x = (
+                                 column - (self.columns - 1) / 2
+                         ) * self.cell_size
+
+                wall_z = (
+                                 row - (self.rows - 1) / 2
+                         ) * self.cell_size
+
+                # Find the closest point on the wall's XZ footprint.
+                closest_x = max(
+                    wall_x - half_wall,
+                    min(x, wall_x + half_wall)
+                )
+
+                closest_z = max(
+                    wall_z - half_wall,
+                    min(z, wall_z + half_wall)
+                )
+
+                dx = x - closest_x
+                dz = z - closest_z
+
+                if dx * dx + dz * dz < radius_squared:
+                    return True
+
+        return False
+
+    def move_player(self, player, move_x, move_z):
+        """
+        Moves the player while preventing horizontal wall penetration.
+        Resolves X and Z separately to allow wall sliding.
+        """
+
+        # Resolve X movement.
+        new_x = player.x + move_x
+
+        if not self.collides_with_wall(
+                new_x,
+                player.z,
+                player.radius
+        ):
+            player.x = new_x
+
+        # Resolve Z movement.
+        new_z = player.z + move_z
+
+        if not self.collides_with_wall(
+                player.x,
+                new_z,
+                player.radius
+        ):
+            player.z = new_z
 
 """
 REFERENCE LIST
