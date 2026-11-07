@@ -54,7 +54,7 @@ class Player:
 
         self.x = 0.0
         self.y = -2.5
-        self.z = 7.5
+        self.z = 300
 
         # Player rotation
         self.rotation = 0.0
