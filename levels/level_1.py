@@ -221,16 +221,16 @@ map = [
     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -265,10 +265,7 @@ class LevelMap:
         self.rows = len(self.map)
         self.columns = len(self.map[0])
 
-        # =====================================
         # MAP SETTINGS
-        # =====================================
-
         # Each floor tile and wall occupies a 64x64 tile area
         self.cell_size = 1.28
 
@@ -279,12 +276,9 @@ class LevelMap:
         self.wall_height = 1.28
         self.wall_depth = 1.28
 
-        self.floor_colour = (0.25, 0.035, 0.09)
+        self.floor_colour = (0.0, 0.0, 0.0)
 
-        # =====================================
         # DYNAMIC MAP LOADING SETTINGS
-        # =====================================
-
         # Number of rows rendered ahead of player
         self.render_distance_ahead = 30
 
@@ -303,12 +297,8 @@ class LevelMap:
         self.wall_cells = set()
 
         for wall_x, wall_z in self.wall_positions:
-            column = round(
-                wall_x / self.cell_size + (self.columns - 1) / 2
-            )
-            row = round(
-                wall_z / self.cell_size + (self.rows - 1) / 2
-            )
+            column = round(wall_x / self.cell_size + (self.columns - 1) / 2)
+            row = round(wall_z / self.cell_size + (self.rows - 1) / 2)
 
             self.wall_cells.add((row, column))
 
@@ -339,12 +329,8 @@ class LevelMap:
     # GET PLAYER MAP ROW
     def get_player_row(self):
 
-        row = int(
-            round(
-                self.player_z / self.cell_size
-                + (self.rows - 1) / 2
-            )
-        )
+        row = int(round(self.player_z / self.cell_size
+                + (self.rows - 1) / 2))
 
         return max(0, min(self.rows - 1, row))
 
@@ -383,42 +369,19 @@ class LevelMap:
 
         image = Image.open(texture_path).convert("RGBA")
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
-
         image_data = image.tobytes()
 
         texture = glGenTextures(1)
-
         glBindTexture(GL_TEXTURE_2D, texture)
 
-        glTexParameteri(
-            GL_TEXTURE_2D,
-            GL_TEXTURE_MIN_FILTER,
-            GL_LINEAR
-        )
-
-        glTexParameteri(
-            GL_TEXTURE_2D,
-            GL_TEXTURE_MAG_FILTER,
-            GL_LINEAR
-        )
-
-        glTexParameteri(
-            GL_TEXTURE_2D,
-            GL_TEXTURE_WRAP_S,
-            GL_REPEAT
-        )
-
-        glTexParameteri(
-            GL_TEXTURE_2D,
-            GL_TEXTURE_WRAP_T,
-            GL_REPEAT
-        )
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
 
         glTexImage2D(
-            GL_TEXTURE_2D, 0, GL_RGBA,
-            image.width, image.height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, image_data
-        )
+            GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height,
+            0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
 
         glBindTexture(GL_TEXTURE_2D, 0)
 

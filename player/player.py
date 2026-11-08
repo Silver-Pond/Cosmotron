@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import trimesh
 
@@ -45,6 +47,9 @@ class Player:
 
         # PLAYER STATUS
         self.alive = True
+
+        # ENEMY KILL COUNT
+        self.enemies_destroyed = 0
 
         # PLAYER POSITION
         self.x = 0.0
@@ -125,13 +130,6 @@ class Player:
         # Bullet collision radius
         self.bullet_collision_radius = 0.15
 
-        # DEBUG INFORMATION
-        print("Player UV:", self.uv_coordinates is not None)
-        print("Bullet UV:", self.bullet_uv_coordinates is not None)
-
-        print("Player texture ID:", self.texture_id)
-        print("Bullet texture ID:", self.bullet_texture_id)
-
     # Load textures
     def load_texture(self, texture_source):
 
@@ -207,7 +205,6 @@ class Player:
         self.z = max(min_z, min(self.z, max_z))
 
     # Update code
-
     def update(self, keys, delta_time):
 
         movement = self.speed * delta_time
@@ -284,68 +281,76 @@ class Player:
         for bullet in self.bullets:
 
             # Store previous bullet position
-            previous_z = bullet["z"]
+            previous_position = (
+                bullet["x"],
+                bullet["y"],
+                bullet["z"]
+            )
 
             # Move bullet forward
             bullet["z"] -= self.bullet_speed * delta_time
 
-            # CHECK TESSERACT COLLISION FIRST
+            # =====================================
+            # TESSERACT COLLISION
+            # =====================================
+
             hit_tesseract = self.check_tesseract_collision(
                 bullet,
-                previous_z
+                previous_position
             )
 
-            # CHECK WALL COLLISION
+            if hit_tesseract:
+                # Bullet disappears after hitting enemy
+                continue
+
+            # =====================================
+            # WALL COLLISION
+            # =====================================
+
             hit_wall = False
 
-            if not hit_tesseract and self.level_map is not None:
+            if self.level_map is not None:
 
-                # Check bullet's new position
-                if self.level_map.collides_with_wall(
-                        bullet["x"],
-                        bullet["z"],
-                        self.bullet_collision_radius
-                ):
-                    hit_wall = True
+                # Check bullet's movement between frames
+                previous_z = previous_position[2]
 
-                # Check intermediate positions to prevent
-                # bullets passing through walls
-                if not hit_wall:
+                distance = abs(bullet["z"] - previous_z)
 
-                    distance = abs(bullet["z"] - previous_z)
+                steps = max(
+                    1,
+                    int(
+                        distance /
+                        (self.level_map.cell_size * 0.2)
+                    ) + 1
+                )
 
-                    steps = max(
-                        1,
-                        int(
-                            distance /
-                            (self.level_map.cell_size * 0.2)
-                        ) + 1
+                for step in range(steps + 1):
+
+                    progress = step / steps
+
+                    check_z = previous_z + (
+                            (bullet["z"] - previous_z) * progress
                     )
 
-                    for step in range(1, steps):
+                    if self.level_map.collides_with_wall(
+                            bullet["x"],
+                            check_z,
+                            self.bullet_collision_radius
+                    ):
+                        hit_wall = True
+                        break
 
-                        check_z = previous_z + (
-                                (bullet["z"] - previous_z)
-                                * (step / steps)
-                        )
+            if hit_wall:
+                continue
 
-                        if self.level_map.collides_with_wall(
-                                bullet["x"],
-                                check_z,
-                                self.bullet_collision_radius
-                        ):
-                            hit_wall = True
-                            break
+            # =====================================
+            # BULLET LIFETIME / ARENA LIMIT
+            # =====================================
 
-            # KEEP SURVIVING BULLETS
-            if (
-                    not hit_wall
-                    and not hit_tesseract
-                    and bullet["z"] > -200
-            ):
+            if bullet["z"] > -200:
                 active_bullets.append(bullet)
 
-        # Replace bullet list with surviving bullets
+        # Replace bullet list
         self.bullets = active_bullets
 
     # Update camera code
@@ -378,7 +383,7 @@ class Player:
         glRotatef(self.rotation, 0, 0, 1)
 
         # Enable texture mapping
-        if (self.texture_id is not None and self.uv_coordinates is not None):
+        if self.texture_id is not None and self.uv_coordinates is not None:
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.texture_id)
             glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
@@ -433,17 +438,8 @@ class Player:
 
             glPushMatrix()
 
-            glTranslatef(
-                bullet["x"],
-                bullet["y"],
-                bullet["z"]
-            )
-
-            glScalef(
-                self.bullet_scale,
-                self.bullet_scale,
-                self.bullet_scale
-            )
+            glTranslatef(bullet["x"], bullet["y"], bullet["z"])
+            glScalef(self.bullet_scale, self.bullet_scale, self.bullet_scale)
 
             glBegin(GL_TRIANGLES)
 
@@ -464,37 +460,62 @@ class Player:
         glBindTexture(GL_TEXTURE_2D, 0)
         glDisable(GL_TEXTURE_2D)
 
-    # Tesseract bullet collision code
-    def check_tesseract_collision(self, bullet, previous_z):
+    # Check tesseract collision
+    def check_tesseract_collision(self, bullet, previous_position):
 
         if self.level_map is None:
             return False
 
-        for tesseract in self.level_map.tesseracts:
+        # Previous bullet position
+        px, py, pz = previous_position
 
-            dx = bullet["x"] - tesseract.x
-            dy = bullet["y"] - tesseract.y
+        # Current bullet position
+        cx = bullet["x"]
+        cy = bullet["y"]
+        cz = bullet["z"]
 
-            # Check bullet's movement along Z
-            min_z = min(previous_z, bullet["z"])
-            max_z = max(previous_z, bullet["z"])
+        # Bullet movement vector
+        dx = cx - px
+        dy = cy - py
+        dz = cz - pz
 
-            closest_z = max(
-                min_z,
-                min(tesseract.z, max_z)
+        length_squared = dx * dx + dy * dy + dz * dz
+
+        for tesseract in self.level_map.tesseracts[:]:
+
+            # Find closest point on bullet trajectory
+            if length_squared > 0:
+
+                t = ((tesseract.x - px) * dx + (tesseract.y - py) * dy +
+                            (tesseract.z - pz) * dz) / length_squared
+
+                t = max(0.0, min(1.0, t))
+
+            else:
+                t = 0.0
+
+            # Closest point
+            closest_x = px + t * dx
+            closest_y = py + t * dy
+            closest_z = pz + t * dz
+
+            # Distance to tesseract centre
+            distance_squared = (
+                    (closest_x - tesseract.x) ** 2 +
+                    (closest_y - tesseract.y) ** 2 +
+                    (closest_z - tesseract.z) ** 2
             )
 
-            dz = closest_z - tesseract.z
-
-            distance = (dx ** 2 + dy ** 2 + dz ** 2) ** 0.5
-
+            # Adjusted collision radius
             collision_distance = (
                     self.bullet_collision_radius +
-                    tesseract.radius
+                    tesseract.radius + 0.15
             )
 
-            if distance < collision_distance:
+            if distance_squared <= collision_distance ** 2:
                 self.level_map.tesseracts.remove(tesseract)
+
+                self.enemies_destroyed += 1
 
                 return True
 

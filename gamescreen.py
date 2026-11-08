@@ -45,12 +45,158 @@ def draw_text(text, x, y, font_size, colour=(255, 255, 255)):
 
     # Render text with transparency
     glDrawPixels(
-        surface.get_width(),
-        surface.get_height(),
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        text_data
+        surface.get_width(), surface.get_height(),
+        GL_RGBA, GL_UNSIGNED_BYTE, text_data
     )
+
+# GAME HUD
+def draw_hud(player, level):
+
+    # Save current OpenGL state
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+
+    glLoadIdentity()
+
+    # Switch to 2D screen coordinates
+    glOrtho(0, WIDTH, HEIGHT, 0, -1, 1)
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+
+    glLoadIdentity()
+
+    # Disable 3D rendering features
+    glDisable(GL_DEPTH_TEST)
+    glDisable(GL_TEXTURE_2D)
+    glDisable(GL_LIGHTING)
+
+    # Enable transparency
+    glEnable(GL_BLEND)
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    # HUD background
+    glColor4f(0.01, 0.03, 0.10, 0.85)
+
+    glBegin(GL_QUADS)
+
+    glVertex2f(15, 15)
+    glVertex2f(300, 15)
+    glVertex2f(300, 125)
+    glVertex2f(15, 125)
+
+    glEnd()
+
+    # HUD border
+    glColor3f(0.1, 0.6, 1.0)
+
+    glLineWidth(2)
+
+    glBegin(GL_LINE_LOOP)
+
+    glVertex2f(15, 15)
+    glVertex2f(300, 15)
+    glVertex2f(300, 125)
+    glVertex2f(15, 125)
+
+    glEnd()
+
+    # Calculate enemy count
+    enemies_remaining = len(level.tesseracts)
+
+    # Display HUD information
+    draw_text(
+        "COSMOTRON",
+        30, 25, 30,
+        (50, 180, 255)
+    )
+
+    draw_text(
+        f"Enemies Remaining: {enemies_remaining}",
+        30, 65, 25,
+        (255, 255, 255)
+    )
+
+    draw_text(
+        f"Enemies Destroyed: {player.enemies_destroyed}",
+        30, 95, 25,
+        (100, 255, 150)
+    )
+
+    # Restore OpenGL state
+    glDisable(GL_BLEND)
+
+    glEnable(GL_DEPTH_TEST)
+
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+
+    glMatrixMode(GL_MODELVIEW)
+
+# DRAW HUD CONTROLS
+def draw_controls():
+    # Save the current OpenGL matrices
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, WIDTH, HEIGHT, 0, -1, 1)
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    # Set up 2D overlay rendering
+    glDisable(GL_DEPTH_TEST)
+    glDisable(GL_TEXTURE_2D)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    # Background panel in the bottom-left corner
+    panel_x = 20
+    panel_y = HEIGHT - 145
+    panel_width = 220
+    panel_height = 125
+
+    glColor4f(0.02, 0.04, 0.10, 0.8)
+
+    glBegin(GL_QUADS)
+    glVertex2f(panel_x, panel_y)
+    glVertex2f(panel_x + panel_width, panel_y)
+    glVertex2f(panel_x + panel_width, panel_y + panel_height)
+    glVertex2f(panel_x, panel_y + panel_height)
+    glEnd()
+
+    # Panel border
+    glColor4f(0.2, 0.6, 1.0, 0.9)
+
+    glBegin(GL_LINE_LOOP)
+    glVertex2f(panel_x, panel_y)
+    glVertex2f(panel_x + panel_width, panel_y)
+    glVertex2f(panel_x + panel_width, panel_y + panel_height)
+    glVertex2f(panel_x, panel_y + panel_height)
+    glEnd()
+
+    # Control labels
+    draw_text("CONTROLS", 35, HEIGHT - 130, 22, (50, 180, 255))
+    draw_text("A       -       Move Left", 35, HEIGHT - 98, 18)
+    draw_text("D       -       Move Right", 35, HEIGHT - 70, 18)
+    draw_text("SPACE   -       Shoot", 35, HEIGHT - 42, 18)
+
+    # Restore OpenGL state and matrices
+    glDisable(GL_BLEND)
+    glEnable(GL_DEPTH_TEST)
+
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+
+    glMatrixMode(GL_MODELVIEW)
 
 # DRAW MENU BUTTON
 def draw_button(text, x, y, width, height, mouse_pos, font_size=40):
@@ -273,6 +419,10 @@ def run_game():
 
         # Draw player bullets
         player.draw_bullets()
+
+        # Draw 2D HUD over 3D game
+        draw_hud(player, level)
+        draw_controls()
 
         pygame.display.flip()
 

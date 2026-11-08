@@ -16,17 +16,18 @@ class Tesseract:
         self.speed = 1.5
         self.direction = 1
 
-        self.radius = 0.25
+        # Collision radius
+        self.radius = 0.40
+
+        # Tesseract visual size
+        self.size = 0.45
 
         # Vertical position
-        self.y = level_map.floor_y + 0.8
+        self.y = level_map.floor_y + 0.9
 
         # Rotation
         self.rotation = 0.0
         self.rotation_speed = 1.0
-
-        # Tesseract size
-        self.size = 0.45
 
         # 4D vertices: all combinations of +/- 1
         self.vertices = list(
@@ -48,10 +49,7 @@ class Tesseract:
                 if differences == 1 and i < j:
                     self.edges.append((i, j))
 
-    # =====================================
     # UPDATE ENEMY
-    # =====================================
-
     def update(self, delta_time):
 
         self.rotation += self.rotation_speed * delta_time
@@ -63,16 +61,12 @@ class Tesseract:
 
         # Check for wall collision
         if self.level_map.collides_with_wall(
-            next_x,
-            self.z,
-            self.radius
-        ):
+            next_x, self.z, self.radius):
 
             # Reverse direction
             self.direction *= -1
 
         else:
-
             self.x = next_x
 
     # =====================================
@@ -116,11 +110,7 @@ class Tesseract:
 
         factor = distance / (distance - w)
 
-        return (
-            x * factor,
-            y * factor,
-            z * factor
-        )
+        return (x * factor, y * factor, z * factor)
 
     # =====================================
     # DRAW TESSERACT
@@ -130,11 +120,7 @@ class Tesseract:
 
         glPushMatrix()
 
-        glTranslatef(
-            self.x,
-            self.y,
-            self.z
-        )
+        glTranslatef(self.x, self.y, self.z)
 
         # Store projected vertices
         projected_vertices = []
@@ -165,17 +151,8 @@ class Tesseract:
             # Different colours for visual depth
             glColor3f(0.2, 0.9, 1.0)
 
-            glVertex3f(
-                a[0] * self.size,
-                a[1] * self.size,
-                a[2] * self.size
-            )
-
-            glVertex3f(
-                b[0] * self.size,
-                b[1] * self.size,
-                b[2] * self.size
-            )
+            glVertex3f(a[0] * self.size, a[1] * self.size, a[2] * self.size)
+            glVertex3f(b[0] * self.size, b[1] * self.size, b[2] * self.size)
 
         glEnd()
 
