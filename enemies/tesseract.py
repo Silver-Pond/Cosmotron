@@ -13,7 +13,7 @@ class Tesseract:
         self.level_map = level_map
 
         # Movement
-        self.speed = 1.5
+        self.speed = 3.5
         self.direction = 1
 
         # Collision radius
@@ -41,8 +41,7 @@ class Tesseract:
 
             for j, vertex_b in enumerate(self.vertices):
 
-                differences = sum(
-                    a != b
+                differences = sum(a != b
                     for a, b in zip(vertex_a, vertex_b)
                 )
 
@@ -69,10 +68,7 @@ class Tesseract:
         else:
             self.x = next_x
 
-    # =====================================
     # 4D ROTATION
-    # =====================================
-
     def rotate_4d(self, vertex):
 
         x, y, z, w = vertex
@@ -97,10 +93,7 @@ class Tesseract:
 
         return new_x, new_y, new_z, new_w
 
-    # =====================================
     # 4D TO 3D PROJECTION
-    # =====================================
-
     def project_4d(self, vertex):
 
         x, y, z, w = vertex
@@ -112,10 +105,7 @@ class Tesseract:
 
         return (x * factor, y * factor, z * factor)
 
-    # =====================================
     # DRAW TESSERACT
-    # =====================================
-
     def draw(self):
 
         glPushMatrix()

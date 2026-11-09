@@ -1,5 +1,3 @@
-import math
-
 import pygame
 import trimesh
 
@@ -9,7 +7,7 @@ from OpenGL.GL import *
 
 class Player:
 
-    def __init__(self, model_path, texture_path=None):
+    def __init__(self, model_path, texture_path = None):
 
         # LOAD PLAYER OBJ MODEL
         self.mesh = trimesh.load(
@@ -46,7 +44,10 @@ class Player:
         self.camera_look_height = 0.5
 
         # PLAYER STATUS
-        self.alive = True
+        self.lives = 1
+        self.tesseract_collision_active = False
+        self.player_collision_radius = 0.75
+        self.dead = False
 
         # ENEMY KILL COUNT
         self.enemies_destroyed = 0
@@ -60,16 +61,21 @@ class Player:
         self.rotation = 0.0
 
         # Movement speed
-        self.speed = 5.0
+        self.speed = 11.5
 
         # Automatic forward movement
-        self.forward_speed = 1.5
+        self.forward_speed = 3
 
         # Forward movement acceleration (optional)
-        self.forward_acceleration = 0.1
+        self.forward_acceleration = 0.2
 
         # Maximum forward speed
-        self.max_forward_speed = 2.5
+        self.max_forward_speed = 5
+
+        # Boost movement
+        self.boost_acceleration = 0.5
+        self.boost_max_speed = 8.0
+        self.boost_deceleration = 2.0
 
         # Reference to level map
         self.level_map = None
@@ -122,7 +128,7 @@ class Player:
         self.bullets = []
 
         self.bullet_speed = 40.0
-        self.bullet_cooldown = 0.5
+        self.bullet_cooldown = 0.2
         self.bullet_timer = 0.0
         self.bullet_scale = 0.2
         self.max_bullets = 10
@@ -164,8 +170,6 @@ class Player:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
         glBindTexture(GL_TEXTURE_2D, 0)
 
-        # Test log
-        print("Spaceship texture loaded successfully!")
         return texture_id
 
     # Shoot code
@@ -212,15 +216,31 @@ class Player:
         target_rotation = 0
 
         # Gradually increase forward speed
-        self.forward_speed += (
-                self.forward_acceleration * delta_time
-        )
+        self.forward_speed += self.forward_acceleration * delta_time
 
-        # Limit maximum forward speed
-        self.forward_speed = min(
-            self.forward_speed,
-            self.max_forward_speed
-        )
+        # W - Boost forward speed
+        if keys[pygame.K_w]:
+
+            self.forward_speed += self.boost_acceleration * delta_time
+
+            # Allow the player to exceed normal maximum speed
+            self.forward_speed = min(
+                self.forward_speed,
+                self.boost_max_speed
+            )
+
+        else:
+            # Gradually return to normal maximum speed
+            self.forward_speed = max(
+                self.max_forward_speed,
+                self.forward_speed - self.boost_deceleration * delta_time
+            )
+
+            # Prevent exceeding normal maximum speed
+            self.forward_speed = min(
+                self.forward_speed,
+                self.max_forward_speed
+            )
 
         # PLAYER MOVEMENT AND COLLISION
         move_z = -self.forward_speed * delta_time
@@ -240,16 +260,14 @@ class Player:
             new_x = self.x + move_x
 
             if not self.level_map.collides_with_wall(
-                    new_x, self.z, self.collision_radius_x
-            ):
+                    new_x, self.z, self.collision_radius_x):
                 self.x = new_x
 
             # Forward collision (Z)
             new_z = self.z + move_z
 
             if not self.level_map.collides_with_wall(
-                    self.x, new_z, self.collision_radius_z
-            ):
+                    self.x, new_z, self.collision_radius_z):
                 self.z = new_z
 
         else:
@@ -282,31 +300,22 @@ class Player:
 
             # Store previous bullet position
             previous_position = (
-                bullet["x"],
-                bullet["y"],
-                bullet["z"]
+                bullet["x"], bullet["y"], bullet["z"]
             )
 
             # Move bullet forward
             bullet["z"] -= self.bullet_speed * delta_time
 
-            # =====================================
             # TESSERACT COLLISION
-            # =====================================
-
-            hit_tesseract = self.check_tesseract_collision(
-                bullet,
-                previous_position
+            hit_tesseract = self.check_tesseract_bullet_collision(
+                bullet, previous_position
             )
 
             if hit_tesseract:
                 # Bullet disappears after hitting enemy
                 continue
 
-            # =====================================
             # WALL COLLISION
-            # =====================================
-
             hit_wall = False
 
             if self.level_map is not None:
@@ -315,38 +324,23 @@ class Player:
                 previous_z = previous_position[2]
 
                 distance = abs(bullet["z"] - previous_z)
-
-                steps = max(
-                    1,
-                    int(
-                        distance /
-                        (self.level_map.cell_size * 0.2)
-                    ) + 1
-                )
+                steps = max(1, int(distance / (self.level_map.cell_size * 0.2)) + 1)
 
                 for step in range(steps + 1):
 
                     progress = step / steps
-
-                    check_z = previous_z + (
-                            (bullet["z"] - previous_z) * progress
-                    )
+                    check_z = previous_z + ((bullet["z"] - previous_z) * progress)
 
                     if self.level_map.collides_with_wall(
-                            bullet["x"],
-                            check_z,
-                            self.bullet_collision_radius
-                    ):
+                            bullet["x"], check_z,
+                            self.bullet_collision_radius):
                         hit_wall = True
                         break
 
             if hit_wall:
                 continue
 
-            # =====================================
             # BULLET LIFETIME / ARENA LIMIT
-            # =====================================
-
             if bullet["z"] > -200:
                 active_bullets.append(bullet)
 
@@ -461,7 +455,42 @@ class Player:
         glDisable(GL_TEXTURE_2D)
 
     # Check tesseract collision
-    def check_tesseract_collision(self, bullet, previous_position):
+    def check_tesseract_collision(self, tesseracts):
+        collision_detected = False
+
+        for tesseract in tesseracts:
+            dx = self.x - tesseract.x
+            dy = self.y - tesseract.y
+            dz = self.z - tesseract.z
+
+            distance_squared = dx * dx + dy * dy + dz * dz
+
+            collision_distance = (
+                    self.player_collision_radius + tesseract.radius
+            )
+
+            if distance_squared <= collision_distance ** 2:
+                collision_detected = True
+                break
+
+        # Only deduct a life once per contact
+        if collision_detected and not self.tesseract_collision_active:
+            self.lives -= 1
+            self.tesseract_collision_active = True
+
+            print("PLAYER HIT BY TESSERACT!")
+            print("Lives remaining:", self.lives)
+
+            if self.lives <= 0:
+                self.dead = True
+                print("PLAYER DIED!")
+
+        # Allow another collision after the player moves away
+        elif not collision_detected:
+            self.tesseract_collision_active = False
+
+    # Check tesseract bullet collision
+    def check_tesseract_bullet_collision(self, bullet, previous_position):
 
         if self.level_map is None:
             return False
@@ -483,7 +512,7 @@ class Player:
 
         for tesseract in self.level_map.tesseracts[:]:
 
-            # Find closest point on bullet trajectory
+            # Find the closest point on bullet trajectory
             if length_squared > 0:
 
                 t = ((tesseract.x - px) * dx + (tesseract.y - py) * dy +

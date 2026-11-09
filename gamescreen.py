@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from OpenGL.GL import *
@@ -122,6 +124,12 @@ def draw_hud(player, level):
         f"Enemies Destroyed: {player.enemies_destroyed}",
         30, 95, 25,
         (100, 255, 150)
+    )
+
+    draw_text(
+        f"Time: {math.ceil(level.timer)}",
+        30, 165, 25,
+        (255, 255, 100)
     )
 
     # Restore OpenGL state
@@ -305,15 +313,13 @@ def main_menu():
         # Game title
         draw_text(
             "COSMOTRON",
-            260, 150,
-            100,
+            260, 150, 100,
             (50, 180, 255)
         )
 
         draw_text(
             "SPACE COMBAT",
-            395, 250,
-            40,
+            395, 250, 40,
             (180, 210, 255)
         )
 
@@ -336,6 +342,12 @@ def main_menu():
         draw_text(
             "Press ENTER to start",
             390, 590, 30,
+            (150, 170, 200)
+        )
+
+        draw_text(
+            "Press ESC to exit",
+            410, 620, 30,
             (150, 170, 200)
         )
 
@@ -397,6 +409,17 @@ def run_game():
 
         # Update tesseract animations
         level.update_tesseracts(delta_time)
+
+        # Update countdown timer
+        level.update_timer(delta_time)
+
+        # Check collision between player and tesseracts
+        player.check_tesseract_collision(level.tesseracts)
+
+        # End the game when the player has no lives left
+        if player.dead or level.time_up:
+            running = False
+            break
 
         # Clear screen
         glClearColor(0.01, 0.01, 0.05, 1.0)
