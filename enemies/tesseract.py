@@ -149,3 +149,20 @@ class Tesseract:
         glLineWidth(1.0)
 
         glPopMatrix()
+
+"""
+REFERENCE LIST
+
+Gregory, J., 2018. Game Engine Architecture.
+3rd edn. Boca Raton: CRC Press.
+
+Lutz, M., 2013. Learning Python.
+5th edn. Sebastopol: O'Reilly Media.
+
+Millington, I. and Funge, J., 2009. Artificial Intelligence for Games.
+2nd edn. Burlington, MA: Morgan Kaufmann.
+
+Shreiner, D., Sellers, G., Kessenich, J. and Licea-Kane, B., 2013.
+OpenGL Programming Guide: The Official Guide to Learning OpenGL.
+8th edn. Upper Saddle River, NJ: Addison-Wesley.
+"""

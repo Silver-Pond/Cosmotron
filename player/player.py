@@ -564,5 +564,25 @@ class Player:
 """
 REFERENCE LIST
 
+Ericson, C., 2005. Real-Time Collision Detection.
+San Francisco: Morgan Kaufmann.
 
+Gregory, J., 2018. Game Engine Architecture.
+3rd edn. Boca Raton: CRC Press.
+
+Pillow, n.d. Pillow documentation. [Online] Available at:
+https://pillow.readthedocs.io/
+[Accessed: 10 November 2026].
+
+Pygame, n.d. Pygame documentation. [Online] Available at:
+https://www.pygame.org/docs/
+[Accessed: 10 November 2026].
+
+Shreiner, D., Sellers, G., Kessenich, J. and Licea-Kane, B., 2013.
+OpenGL Programming Guide: The Official Guide to Learning OpenGL.
+8th edn. Upper Saddle River, NJ: Addison-Wesley.
+
+Trimesh, n.d. Trimesh documentation. [Online] Available at:
+https://trimesh.org/
+[Accessed: 10 November 2026].
 """

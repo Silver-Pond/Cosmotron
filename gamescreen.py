@@ -190,10 +190,10 @@ def draw_controls():
     draw_text("CONTROLS", panel_x + 12, panel_y + panel_height - 25,
               18, (50, 180, 255))
 
-    draw_text("W  -  Accelerate", panel_x + 12, panel_y + panel_height - 50, 16)
-    draw_text("A  -  Move Left", panel_x + 12, panel_y + panel_height - 72, 16)
-    draw_text("D  -  Move Right", panel_x + 12, panel_y + panel_height - 94, 16)
-    draw_text("SPACE  -  Shoot", panel_x + 12, panel_y + panel_height - 116, 16)
+    draw_text("W  -  Accelerate", panel_x + 12, panel_y + panel_height - 50, 15)
+    draw_text("A  -  Move Left", panel_x + 12, panel_y + panel_height - 72, 15)
+    draw_text("D  -  Move Right", panel_x + 12, panel_y + panel_height - 94, 15)
+    draw_text("SPACE  -  Shoot", panel_x + 12, panel_y + panel_height - 116, 15)
 
     # Restore OpenGL state and matrices
     glDisable(GL_BLEND)
