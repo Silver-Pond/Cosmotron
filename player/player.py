@@ -74,7 +74,7 @@ class Player:
 
         # Boost movement
         self.boost_acceleration = 0.5
-        self.boost_max_speed = 8.0
+        self.boost_max_speed = 9.0
         self.boost_deceleration = 2.0
 
         # Reference to level map
