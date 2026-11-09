@@ -42,6 +42,7 @@ class Player:
         self.camera_distance = 6.0
         self.camera_height = 2.5
         self.camera_look_height = 0.5
+        self.camera_fov = 55.0  # Narrower horizontal view
 
         # PLAYER STATUS
         self.lives = 1
@@ -74,8 +75,8 @@ class Player:
 
         # Boost movement
         self.boost_acceleration = 0.5
-        self.boost_max_speed = 9.0
-        self.boost_deceleration = 2.0
+        self.boost_max_speed = 9.5
+        self.boost_deceleration = 1.5
 
         # Reference to level map
         self.level_map = None
@@ -349,16 +350,17 @@ class Player:
 
     # Update camera code
     def update_camera(self):
-        camera_distance = 6.0
-        camera_height = 2.5
+        # CAMERA SETTINGS
+        camera_distance = 5.0
+        camera_height = 2.2
         look_height = 0.5
 
-        # Fixed camera position behind the spaceship
+        # Camera position behind the spaceship
         camera_x = self.x
         camera_y = self.y + camera_height
         camera_z = self.z + camera_distance
 
-        # Look towards the spaceship
+        # Camera target
         target_x = self.x
         target_y = self.y + look_height
         target_z = self.z
@@ -478,12 +480,8 @@ class Player:
             self.lives -= 1
             self.tesseract_collision_active = True
 
-            print("PLAYER HIT BY TESSERACT!")
-            print("Lives remaining:", self.lives)
-
             if self.lives <= 0:
                 self.dead = True
-                print("PLAYER DIED!")
 
         # Allow another collision after the player moves away
         elif not collision_detected:
@@ -528,7 +526,7 @@ class Player:
             closest_y = py + t * dy
             closest_z = pz + t * dz
 
-            # Distance to tesseract centre
+            # Distance to tesseract centear
             distance_squared = (
                     (closest_x - tesseract.x) ** 2 +
                     (closest_y - tesseract.y) ** 2 +

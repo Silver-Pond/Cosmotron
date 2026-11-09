@@ -1,10 +1,8 @@
 import math
-
 import pygame
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
-
 from player.player import Player
 from levels.level_1 import LevelMap
 
@@ -127,7 +125,7 @@ def draw_hud(player, level):
     )
 
     draw_text(
-        f"Time: {math.ceil(level.timer)}",
+        f"Time: {int(level.timer // 60):02d}:{int(math.ceil(level.timer % 60)):02d}",
         30, 165, 25,
         (255, 255, 100)
     )
@@ -188,11 +186,14 @@ def draw_controls():
     glVertex2f(panel_x, panel_y + panel_height)
     glEnd()
 
-    # Control labels
-    draw_text("CONTROLS", 35, HEIGHT - 130, 22, (50, 180, 255))
-    draw_text("A       -       Move Left", 35, HEIGHT - 98, 18)
-    draw_text("D       -       Move Right", 35, HEIGHT - 70, 18)
-    draw_text("SPACE   -       Shoot", 35, HEIGHT - 42, 18)
+    # Control labels - compact bottom-left layout
+    draw_text("CONTROLS", panel_x + 12, panel_y + panel_height - 25,
+              18, (50, 180, 255))
+
+    draw_text("W  -  Accelerate", panel_x + 12, panel_y + panel_height - 50, 16)
+    draw_text("A  -  Move Left", panel_x + 12, panel_y + panel_height - 72, 16)
+    draw_text("D  -  Move Right", panel_x + 12, panel_y + panel_height - 94, 16)
+    draw_text("SPACE  -  Shoot", panel_x + 12, panel_y + panel_height - 116, 16)
 
     # Restore OpenGL state and matrices
     glDisable(GL_BLEND)
@@ -485,5 +486,22 @@ def run():
 """
 REFERENCE LIST
 
+Gregory, J., 2018. Game Engine Architecture. 3rd edn.
+Boca Raton: CRC Press.
 
+Pygame, n.d. Pygame documentation. [Online] Available at:
+https://www.pygame.org/docs/
+[Accessed: 10 November 2026].
+
+Python Software Foundation, n.d. math — Mathematical functions.
+Python documentation. [Online] Available at:
+https://docs.python.org/3/library/math.html
+[Accessed: 10 November 2026].
+
+Rogers, S., 2014. Level Up! The Guide to Great Video Game Design.
+2nd edn. Chichester: Wiley.
+
+Shreiner, D., Sellers, G., Kessenich, J. and Licea-Kane, B., 2013.
+OpenGL Programming Guide: The Official Guide to Learning OpenGL.
+8th edn. Upper Saddle River, NJ: Addison-Wesley.
 """
