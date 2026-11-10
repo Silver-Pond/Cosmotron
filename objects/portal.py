@@ -81,10 +81,8 @@ class Portal:
     def draw(self):
 
         glPushAttrib(
-            GL_ENABLE_BIT |
-            GL_COLOR_BUFFER_BIT |
-            GL_TEXTURE_BIT |
-            GL_LINE_BIT
+            GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT |
+            GL_TEXTURE_BIT | GL_LINE_BIT
         )
 
         glPushMatrix()
