@@ -14,6 +14,9 @@ MENU = 0
 GAME = 1
 EXIT = 2
 
+# MENU SOUNDTRACK
+MENU_MUSIC = "assets/soundtracks/astroid_belt.mp3"
+
 # INITIALISE OPENGL 2D MENU
 def setup_menu():
 
@@ -256,10 +259,27 @@ def draw_button(text, x, y, width, height, mouse_pos, font_size=40):
 
     return hovered
 
+# PLAY MENU SOUNDTRACK
+def play_menu_music():
+
+    pygame.mixer.music.load(MENU_MUSIC)
+
+    # -1 means repeat indefinitely
+    pygame.mixer.music.play(-1)
+
+    # Set soundtrack volume (0.0 - 1.0)
+    pygame.mixer.music.set_volume(0.5)
+
 # MAIN MENU
 def main_menu():
 
     setup_menu()
+
+    # Start soundtrack when entering the menu
+    if not pygame.mixer.music.get_busy():
+        play_menu_music()
+
+    clock = pygame.time.Clock()
 
     while True:
 
@@ -268,14 +288,22 @@ def main_menu():
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
+
+                pygame.mixer.music.stop()
                 return EXIT
 
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_RETURN:
+
+                    # Stop menu soundtrack before gameplay
+                    pygame.mixer.music.stop()
+
                     return GAME
 
                 if event.key == pygame.K_ESCAPE:
+
+                    pygame.mixer.music.stop()
                     return EXIT
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -287,9 +315,15 @@ def main_menu():
                     if 350 <= mouse_x <= 650:
 
                         if 350 <= mouse_y <= 420:
+
+                            # Stop menu soundtrack before gameplay
+                            pygame.mixer.music.stop()
+
                             return GAME
 
                         if 450 <= mouse_y <= 520:
+
+                            pygame.mixer.music.stop()
                             return EXIT
 
         # Clear screen
@@ -354,7 +388,7 @@ def main_menu():
 
         pygame.display.flip()
 
-        pygame.time.Clock().tick(60)
+        clock.tick(60)
 
 # GAME
 def run_game():
@@ -460,6 +494,9 @@ def run():
 
     pygame.init()
 
+    # Initialise audio mixer
+    pygame.mixer.init()
+
     pygame.display.set_mode(
         (WIDTH, HEIGHT),
         pygame.DOUBLEBUF | pygame.OPENGL
@@ -480,6 +517,9 @@ def run():
 
         if choice == GAME:
             run_game()
+
+    # Stop any remaining music
+    pygame.mixer.music.stop()
 
     pygame.quit()
 
