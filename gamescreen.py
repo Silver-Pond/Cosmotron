@@ -13,6 +13,7 @@ HEIGHT = 700
 MENU = 0
 GAME = 1
 EXIT = 2
+GAME_OVER = 3
 
 # MENU SOUNDTRACK
 MENU_MUSIC = "assets/soundtracks/astroid_belt.mp3"
@@ -390,6 +391,100 @@ def main_menu():
 
         clock.tick(60)
 
+# GAME OVER SCREEN
+def game_over_screen(player, level, reason):
+
+    setup_menu()
+
+    clock = pygame.time.Clock()
+
+    while True:
+
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                return EXIT
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_RETURN:
+                    return GAME
+
+                if event.key == pygame.K_ESCAPE:
+                    return MENU
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+                if event.button == 1:
+
+                    mouse_x, mouse_y = event.pos
+
+                    # MAIN MENU
+                    if 350 <= mouse_x <= 650:
+                        if 500 <= mouse_y <= 570:
+                            return MENU
+
+        # Clear screen
+        glClearColor(0.01, 0.01, 0.08, 1.0)
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        glLoadIdentity()
+
+        # Background
+        glColor3f(0.01, 0.01, 0.01)
+
+        glBegin(GL_QUADS)
+
+        glVertex2f(0, 0)
+        glVertex2f(WIDTH, 0)
+        glVertex2f(WIDTH, HEIGHT)
+        glVertex2f(0, HEIGHT)
+
+        glEnd()
+
+        # GAME OVER TITLE
+        draw_text(
+            "GAME OVER",
+            245, 200, 120,
+            (255, 255, 255)
+        )
+
+        # Display reason
+        draw_text(
+            reason,
+            320, 360, 35,
+            (255, 200, 100)
+        )
+
+        # Game statistics
+        draw_text(
+            f"Enemies Destroyed: {player.enemies_destroyed}",
+            390, 400, 30,
+            (100, 220, 255)
+        )
+
+        # MAIN MENU BUTTON
+        draw_button(
+            "CONTINUE",
+            350, 500,
+            300, 70,
+            mouse_pos
+        )
+
+        # Instructions
+        draw_text(
+            "Press ENTER to continue",
+            400, 610, 25,
+            (150, 170, 200)
+        )
+
+        pygame.display.flip()
+
+        clock.tick(60)
+
 # GAME
 def run_game():
 
@@ -452,7 +547,14 @@ def run_game():
         player.check_tesseract_collision(level.tesseracts)
 
         # End the game when the player has no lives left
-        if player.dead or level.time_up:
+        # Check game over conditions
+        if player.dead:
+            game_over_reason = "YOUR SHIP WAS DESTROYED!"
+            running = False
+            break
+
+        elif level.time_up:
+            game_over_reason = "TIME HAS RUN OUT!"
             running = False
             break
 
@@ -487,10 +589,14 @@ def run_game():
     # Clean up
     player.cleanup()
 
+    # Return game over screen
+    if player.dead or level.time_up:
+        return game_over_screen(player, level, game_over_reason)
+
+    return MENU
+
 # MAIN
 def run():
-
-    print("CosmoTron started!")
 
     pygame.init()
 
@@ -502,6 +608,7 @@ def run():
         pygame.DOUBLEBUF | pygame.OPENGL
     )
 
+    # Display screen caption
     pygame.display.set_caption("CosmoTron")
 
     # Preserve original PNG colors
@@ -516,7 +623,21 @@ def run():
             break
 
         if choice == GAME:
-            run_game()
+
+            while True:
+
+                result = run_game()
+
+                if result == EXIT:
+                    pygame.quit()
+                    return
+
+                elif result == MENU:
+                    break
+
+                elif result == GAME:
+                    # Start a fresh game
+                    continue
 
     # Stop any remaining music
     pygame.mixer.music.stop()

@@ -373,7 +373,7 @@ class LevelMap:
     # Load Anomaly Texture
     def load_wall_texture(self):
 
-        texture_path = os.path.join("assets", "anomaly.png")
+        texture_path = os.path.join("assets/enemies", "anomaly.png")
 
         image = Image.open(texture_path).convert("RGBA")
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
@@ -532,33 +532,20 @@ class LevelMap:
         # Only inspect nearby grid cells.
         reach = int(player_radius / self.cell_size) + 1
 
-        center_column = round(
-            x / self.cell_size + (self.columns - 1) / 2
-        )
-
-        center_row = round(
-            z / self.cell_size + (self.rows - 1) / 2
-        )
+        center_column = round(x / self.cell_size + (self.columns - 1) / 2)
+        center_row = round(z / self.cell_size + (self.rows - 1) / 2)
 
         radius_squared = player_radius * player_radius
 
-        for row in range(
-                center_row - reach,
-                center_row + reach + 1
-        ):
-            for column in range(
-                    center_column - reach,
-                    center_column + reach + 1
-            ):
+        for row in range(center_row - reach, center_row + reach + 1):
+
+            for column in range(center_column - reach, center_column + reach + 1):
 
                 if (row, column) not in self.wall_cells:
                     continue
 
-                wall_x = (column - (self.columns - 1) / 2
-                         ) * self.cell_size
-
-                wall_z = (row - (self.rows - 1) / 2
-                         ) * self.cell_size
+                wall_x = (column - (self.columns - 1) / 2) * self.cell_size
+                wall_z = (row - (self.rows - 1) / 2) * self.cell_size
 
                 # Find the closest point on the wall's XZ footprint.
                 closest_x = max(
@@ -590,9 +577,7 @@ class LevelMap:
         new_x = player.x + move_x
 
         if not self.collides_with_wall(
-                new_x,
-                player.z,
-                player.radius
+                new_x, player.z, player.radius
         ):
             player.x = new_x
 
@@ -600,9 +585,7 @@ class LevelMap:
         new_z = player.z + move_z
 
         if not self.collides_with_wall(
-                player.x,
-                new_z,
-                player.radius
+                player.x, new_z, player.radius
         ):
             player.z = new_z
 
@@ -632,6 +615,9 @@ CRC Press.
 
 Nystrom, R., 2014. Game Programming Patterns. [Online]
 Available at: https://gameprogrammingpatterns.com/ [Accessed: 10 November 2026].
+
+pngaaa, 2026. Portals - Portal Png Transparent,Portal Png. [Online]. 
+Available at: https://www.pngaaa.com/download/3113876 [Accessed 10 November 2026]
 
 PyOpenGL, 2024. PyOpenGL documentation. [Online]
 Available at: https://pyopengl.sourceforge.net/documentation/ [Accessed: 10 November 2026].
