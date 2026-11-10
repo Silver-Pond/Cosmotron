@@ -1,13 +1,13 @@
+import os
 from PIL import Image
 from OpenGL.GL import *
-import os
-
 from enemies.reverseract import PurpleTesseract
 from enemies.tesseract import Tesseract
+from objects.portal import Portal
 
-# Level layout
+# Level 1 layout
 map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -254,6 +254,18 @@ map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
+# Level 2 layout
+map2 = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
+# ALL GAME LEVELS
+LEVEL_MAPS = [
+    map,
+    map2
+]
+
 class LevelMap:
 
     def __init__(self, level_data=None):
@@ -273,6 +285,9 @@ class LevelMap:
 
         self.timer = 60.0  # 1 minute
         self.time_up = False
+
+        # PORTAL
+        self.portal = None
 
         # Wall dimensions
         self.wall_width = 1.28
@@ -307,6 +322,7 @@ class LevelMap:
 
         # TESSERACT ENEMIES
         self.tesseracts = []
+        self.portal = None
 
         for row_index, row in enumerate(self.map):
 
@@ -328,11 +344,29 @@ class LevelMap:
                         PurpleTesseract(world_x, world_z, self)
                     )
 
+                elif tile == 4:
+                    # Level exit portal
+                    self.portal = Portal(
+                        world_x, world_z, self
+                    )
+
+                print("Tesseracts loaded:", len(self.tesseracts))
+
+                if self.portal:
+                    print("Portal loaded:", self.portal.x, self.portal.z)
+                else:
+                    print("WARNING: No portal found in this level!")
+
         print("Tesseracts loaded:", len(self.tesseracts))
 
     # UPDATE PLAYER POSITION
     def update(self, player_z):
         self.player_z = player_z
+
+    # UPDATE PORTAL
+    def update_portal(self, delta_time):
+        if self.portal is not None:
+            self.portal.update(delta_time)
 
     # GET PLAYER MAP ROW
     def get_player_row(self):
@@ -478,6 +512,17 @@ class LevelMap:
         # Draw tesseracts once per frame
         self.draw_tesseracts()
 
+        # Draw portal if its map row is visible
+        if self.portal is not None:
+
+            portal_row = int(round(
+                self.portal.z / self.cell_size
+                + (self.rows - 1) / 2)
+            )
+
+            if portal_row in visible_rows:
+                self.portal.draw()
+
     # Get Wall Positions
     def get_wall_positions(self):
 
@@ -488,14 +533,8 @@ class LevelMap:
             for column in range(self.columns):
 
                 if self.map[row][column] == 1:
-
-                    x = (
-                        column - (self.columns - 1) / 2
-                    ) * self.cell_size
-
-                    z = (
-                        row - (self.rows - 1) / 2
-                    ) * self.cell_size
+                    x = (column - (self.columns - 1) / 2) * self.cell_size
+                    z = (row - (self.rows - 1) / 2) * self.cell_size
 
                     walls.append((x, z))
 
@@ -566,6 +605,13 @@ class LevelMap:
 
         return False
 
+    # CHECK PORTAL COLLISION
+    def check_portal_collision(self, player):
+        if self.portal is None:
+            return False
+
+        return self.portal.check_collision(player)
+
     # Wall collider addition (player movement)
     def move_player(self, player, move_x, move_z):
         """
@@ -576,17 +622,13 @@ class LevelMap:
         # Resolve X movement.
         new_x = player.x + move_x
 
-        if not self.collides_with_wall(
-                new_x, player.z, player.radius
-        ):
+        if not self.collides_with_wall(new_x, player.z, player.radius):
             player.x = new_x
 
         # Resolve Z movement.
         new_z = player.z + move_z
 
-        if not self.collides_with_wall(
-                player.x, new_z, player.radius
-        ):
+        if not self.collides_with_wall(player.x, new_z, player.radius):
             player.z = new_z
 
     # Timer code

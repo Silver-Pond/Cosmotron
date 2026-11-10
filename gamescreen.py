@@ -4,7 +4,7 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from player.player import Player
-from levels.level_1 import LevelMap
+from levels.level_1 import LevelMap, LEVEL_MAPS
 
 # MENU SETTINGS
 WIDTH = 1000
@@ -410,9 +410,6 @@ def game_over_screen(player, level, reason):
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_RETURN:
-                    return GAME
-
-                if event.key == pygame.K_ESCAPE:
                     return MENU
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -500,8 +497,11 @@ def run_game():
 
     glMatrixMode(GL_MODELVIEW)
 
-    # Create level
-    level = LevelMap()
+    # LEVEL MANAGEMENT
+    level_index = 0
+
+    # Load first level
+    level = LevelMap(LEVEL_MAPS[level_index])
 
     # Create player spacecraft
     player = Player(
@@ -540,6 +540,9 @@ def run_game():
         # Update tesseract animations
         level.update_tesseracts(delta_time)
 
+        # Update portal animation
+        level.update_portal(delta_time)
+
         # Update countdown timer
         level.update_timer(delta_time)
 
@@ -557,6 +560,38 @@ def run_game():
             game_over_reason = "TIME HAS RUN OUT!"
             running = False
             break
+
+        # CHECK PORTAL
+        if level.check_portal_collision(player):
+
+            print("PORTAL ENTERED!")
+
+            # Check whether another level exists
+            if level_index + 1 < len(LEVEL_MAPS):
+
+                level_index += 1
+
+                print("Loading Level:", level_index + 1)
+
+                # Replace the current map
+                level = LevelMap(LEVEL_MAPS[level_index])
+
+                # Connect the player to the new level
+                player.set_level_map(level)
+
+                # Reset player position to the center of the new map
+                player.x = 0.0
+                player.z = 0.0
+
+                # Continue with the next level
+                continue
+
+            else:
+                print("ALL LEVELS COMPLETED!")
+
+                running = False
+                completed_all_levels = True
+                break
 
         # Clear screen
         glClearColor(0.01, 0.01, 0.05, 1.0)
@@ -589,10 +624,15 @@ def run_game():
     # Clean up
     player.cleanup()
 
-    # Return game over screen
+    # Show game over screen
     if player.dead or level.time_up:
         return game_over_screen(player, level, game_over_reason)
 
+    # All levels completed
+    if completed_all_levels:
+        return MENU
+
+    # ESC pressed - return to main menu
     return MENU
 
 # MAIN
