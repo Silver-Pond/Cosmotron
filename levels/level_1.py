@@ -599,13 +599,8 @@ class LevelMap:
         half_wall = self.cell_size / 2
         radius_squared = player_radius ** 2
 
-        center_column = round(
-            x / self.cell_size + (self.columns - 1) / 2
-        )
-
-        center_row = round(
-            z / self.cell_size + (self.rows - 1) / 2
-        )
+        center_column = round(x / self.cell_size + (self.columns - 1) / 2)
+        center_row = round(z / self.cell_size + (self.rows - 1) / 2)
 
         reach = int(player_radius / self.cell_size) + 1
 
