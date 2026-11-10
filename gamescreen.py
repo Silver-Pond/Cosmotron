@@ -500,6 +500,20 @@ def run_game():
     # Start gameplay soundtrack
     play_game_music()
 
+    # Load level-switch sound effect
+    level_switch_sound = pygame.mixer.Sound(
+        "assets/soundtracks/lvlswitch.mp3"
+    )
+
+    level_switch_sound.set_volume(0.5)
+
+    # Load game-over sound effect
+    game_over_sound = pygame.mixer.Sound(
+        "assets/soundtracks/game_over.mp3"
+    )
+
+    game_over_sound.set_volume(0.5)
+
     # Restore 3D projection
     glDisable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
@@ -583,6 +597,9 @@ def run_game():
 
             print("PORTAL ENTERED!")
 
+            # Play level-switch sound
+            level_switch_sound.play()
+
             # Check whether another level exists
             if level_index + 1 < len(LEVEL_MAPS):
 
@@ -646,6 +663,14 @@ def run_game():
 
     # Show game over screen
     if player.dead or level.time_up:
+
+        # Play game-over sound
+        game_over_sound.play()
+
+        # Wait until the sound finishes
+        while game_over_sound.get_num_channels() > 0:
+            pygame.time.wait(50)
+
         return game_over_screen(player, level, game_over_reason)
 
     # All levels completed
