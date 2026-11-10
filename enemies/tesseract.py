@@ -17,7 +17,7 @@ class Tesseract:
         self.direction = 1
 
         # Collision radius
-        self.radius = 0.40
+        self.radius = 0.45
 
         # Tesseract visual size
         self.size = 0.45

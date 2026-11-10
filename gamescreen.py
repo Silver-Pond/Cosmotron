@@ -272,6 +272,17 @@ def play_menu_music():
     # Set soundtrack volume (0.0 - 1.0)
     pygame.mixer.music.set_volume(0.5)
 
+# PLAY GAMEPLAY SOUNDTRACK
+def play_game_music():
+
+    pygame.mixer.music.load(GAME_MUSIC)
+
+    # Repeat indefinitely
+    pygame.mixer.music.play(-1)
+
+    # Gameplay soundtrack volume
+    pygame.mixer.music.set_volume(0.4)
+
 # MAIN MENU
 def main_menu():
 
@@ -486,6 +497,9 @@ def game_over_screen(player, level, reason):
 # GAME
 def run_game():
 
+    # Start gameplay soundtrack
+    play_game_music()
+
     # Restore 3D projection
     glDisable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
@@ -516,6 +530,8 @@ def run_game():
     clock = pygame.time.Clock()
 
     running = True
+
+    completed_all_levels = False
 
     while running:
 
@@ -624,6 +640,9 @@ def run_game():
 
     # Clean up
     player.cleanup()
+
+    # Stop gameplay soundtrack
+    pygame.mixer.music.stop()
 
     # Show game over screen
     if player.dead or level.time_up:

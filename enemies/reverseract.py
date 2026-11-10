@@ -12,7 +12,7 @@ class PurpleTesseract(Tesseract):
         self.direction = 1
 
         # Purple enemy collision radius
-        self.radius = 0.40
+        self.radius = 0.45
 
         # Purple tesseract rotation
         self.rotation_speed = 1.0

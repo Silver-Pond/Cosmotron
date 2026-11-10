@@ -1,5 +1,6 @@
 import pygame
 import trimesh
+import numpy as np
 
 from OpenGL.raw.GLU import gluLookAt
 from PIL import Image
@@ -37,6 +38,14 @@ class Player:
 
         if hasattr(self.mesh.visual, "uv"):
             self.uv_coordinates = self.mesh.visual.uv
+
+        # UPLOAD PLAYER MODEL TO GPU
+        self.player_vbo, self.player_vertex_count = self.create_mesh_vbo(
+            self.vertices,
+            self.faces,
+            self.normals,
+            self.uv_coordinates
+        )
 
         # CAMERA SETTINGS
         self.camera_distance = 6.0
@@ -120,6 +129,14 @@ class Player:
         if hasattr(self.bullet_mesh.visual, "uv"):
             self.bullet_uv_coordinates = self.bullet_mesh.visual.uv
 
+        # UPLOAD BULLET MODEL TO GPU
+        self.bullet_vbo, self.bullet_vertex_count = self.create_mesh_vbo(
+            self.bullet_vertices,
+            self.bullet_faces,
+            self.bullet_normals,
+            self.bullet_uv_coordinates
+        )
+
         # BULLET TEXTURE
         self.bullet_texture_id = self.load_texture(
             "assets/player/bullet/bomber.png"
@@ -134,8 +151,57 @@ class Player:
         self.bullet_scale = 0.2
         self.max_bullets = 10
 
+        # BULLET SOUND EFFECT
+        self.shoot_sound = pygame.mixer.Sound(
+            "assets/soundtracks/blast01.mp3"
+        )
+
+        self.shoot_sound.set_volume(0.35)
+
         # Bullet collision radius
         self.bullet_collision_radius = 0.15
+
+    # CREATE GPU MESH BUFFER
+    def create_mesh_vbo(self, vertices, faces, normals, uv_coordinates):
+
+        # Expand indexed geometry into a triangle list
+        triangle_vertices = vertices[faces].reshape(-1, 3)
+
+        # Repeat each face normal for its three vertices
+        triangle_normals = np.repeat(normals, 3, axis=0)
+
+        # Use UV coordinates if available
+        if uv_coordinates is not None:
+            triangle_uvs = uv_coordinates[faces].reshape(-1, 2)
+        else:
+            triangle_uvs = np.zeros(
+                (len(triangle_vertices), 2),
+                dtype=np.float32
+            )
+
+        # Interleaved layout:
+        # U, V, NX, NY, NZ, X, Y, Z
+        mesh_data = np.hstack((
+            triangle_uvs,
+            triangle_normals,
+            triangle_vertices
+        )).astype(np.float32)
+
+        mesh_data = np.ascontiguousarray(mesh_data)
+
+        # Upload geometry to GPU
+        vbo = glGenBuffers(1)
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+
+        glBufferData(
+            GL_ARRAY_BUFFER, mesh_data.nbytes,
+            mesh_data, GL_STATIC_DRAW
+        )
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+        return vbo, len(triangle_vertices)
 
     # Load textures
     def load_texture(self, texture_source):
@@ -173,16 +239,24 @@ class Player:
 
         return texture_id
 
-    # Shoot code
+    # Shoot Bullet
     def shoot(self):
 
+        # Prevent exceeding the bullet limit
         if len(self.bullets) >= self.max_bullets:
             return
 
-        # Spawn bullet at spaceship position
-        bullet = {"x": self.x, "y": self.y, "z": self.z - 1.5}
+        # Create bullet at spacecraft position
+        bullet = {
+            "x": self.x,
+            "y": self.y,
+            "z": self.z - 1.5
+        }
 
         self.bullets.append(bullet)
+
+        # Play shooting sound effect
+        self.shoot_sound.play()
 
     # Set level map for collision detection
     def set_level_map(self, level_map):
@@ -375,85 +449,122 @@ class Player:
         # Position spacecraft
         glTranslatef(self.x, self.y, self.z)
 
-        # Rotate spacecraft
+        # Apply spacecraft rotation
         glRotatef(self.rotation, 0, 0, 1)
 
-        # Enable texture mapping
+        # Enable player texture when available
         if self.texture_id is not None and self.uv_coordinates is not None:
+
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.texture_id)
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+
+            glTexEnvi(
+                GL_TEXTURE_ENV,
+                GL_TEXTURE_ENV_MODE,
+                GL_MODULATE
+            )
 
         else:
             glDisable(GL_TEXTURE_2D)
 
-        # White tint preserves original texture colours
-        glColor4f(1, 1, 1, 1)
+        # Preserve original model colours
+        glColor4f(1.0, 1.0, 1.0, 1.0)
 
-        # Render model
-        glBegin(GL_TRIANGLES)
+        # Bind player geometry
+        glBindBuffer(GL_ARRAY_BUFFER, self.player_vbo)
 
-        for i, face in enumerate(self.faces):
+        # Interleaved layout: UV, normal, vertex
+        glInterleavedArrays(
+            GL_T2F_N3F_V3F,
+            0,
+            None
+        )
 
-            # Surface normal
-            glNormal3fv(self.normals[i])
+        # Render entire player mesh in one draw call
+        glDrawArrays(
+            GL_TRIANGLES,
+            0,
+            self.player_vertex_count
+        )
 
-            for vertex_index in face:
+        # Disable client-side arrays
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_NORMAL_ARRAY)
+        glDisableClientState(GL_VERTEX_ARRAY)
 
-                # Apply UV texture coordinates
-                if self.uv_coordinates is not None:
-
-                    glTexCoord2fv(self.uv_coordinates[vertex_index])
-
-                # Draw vertex
-                glVertex3fv(self.vertices[vertex_index])
-
-        glEnd()
-
-        # Disable texture
+        # Unbind VBO and texture
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
         glBindTexture(GL_TEXTURE_2D, 0)
+
         glDisable(GL_TEXTURE_2D)
+
         glPopMatrix()
 
     # Draw bullets code
     def draw_bullets(self):
 
+        if not self.bullets:
+            return
+
         # Enable bullet texture
-        if self.bullet_texture_id is not None:
+        if self.bullet_texture_id is not None and self.bullet_uv_coordinates is not None:
+
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.bullet_texture_id)
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+
+            glTexEnvi(
+                GL_TEXTURE_ENV,
+                GL_TEXTURE_ENV_MODE,
+                GL_MODULATE
+            )
 
         else:
             glDisable(GL_TEXTURE_2D)
 
-        glColor4f(1, 1, 1, 1)
+        glColor4f(1.0, 1.0, 1.0, 1.0)
 
-        # Render each bullet
+        # Bind the shared bullet geometry once
+        glBindBuffer(GL_ARRAY_BUFFER, self.bullet_vbo)
+
+        glInterleavedArrays(
+            GL_T2F_N3F_V3F,
+            0,
+            None
+        )
+
+        # Draw each bullet using the same GPU geometry
         for bullet in self.bullets:
-
             glPushMatrix()
 
-            glTranslatef(bullet["x"], bullet["y"], bullet["z"])
-            glScalef(self.bullet_scale, self.bullet_scale, self.bullet_scale)
+            glTranslatef(
+                bullet["x"],
+                bullet["y"],
+                bullet["z"]
+            )
 
-            glBegin(GL_TRIANGLES)
+            glScalef(
+                self.bullet_scale,
+                self.bullet_scale,
+                self.bullet_scale
+            )
 
-            for i, face in enumerate(self.bullet_faces):
-                glNormal3fv(self.bullet_normals[i])
-
-                for vertex_index in face:
-                    if self.bullet_uv_coordinates is not None:
-                        glTexCoord2fv(self.bullet_uv_coordinates[vertex_index])
-
-                    glVertex3fv(self.bullet_vertices[vertex_index])
-
-            glEnd()
+            glDrawArrays(
+                GL_TRIANGLES,
+                0,
+                self.bullet_vertex_count
+            )
 
             glPopMatrix()
 
-        # Disable bullet texture
+        # Disable client-side arrays
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_NORMAL_ARRAY)
+        glDisableClientState(GL_VERTEX_ARRAY)
+
+        # Unbind buffers and textures
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
         glBindTexture(GL_TEXTURE_2D, 0)
+
         glDisable(GL_TEXTURE_2D)
 
     # Check tesseract collision
@@ -496,23 +607,20 @@ class Player:
         # Previous bullet position
         px, py, pz = previous_position
 
-        # Current bullet position
-        cx = bullet["x"]
-        cy = bullet["y"]
-        cz = bullet["z"]
-
         # Bullet movement vector
-        dx = cx - px
-        dy = cy - py
-        dz = cz - pz
+        dx = bullet["x"] - px
+        dy = bullet["y"] - py
+        dz = bullet["z"] - pz
 
         length_squared = dx * dx + dy * dy + dz * dz
 
-        for tesseract in self.level_map.tesseracts[:]:
+        tesseracts = self.level_map.tesseracts
 
-            # Find the closest point on bullet trajectory
+        # Check each enemy
+        for index, tesseract in enumerate(tesseracts):
+
+            # Closest point on bullet trajectory
             if length_squared > 0:
-
                 t = ((tesseract.x - px) * dx + (tesseract.y - py) * dy +
                             (tesseract.z - pz) * dz) / length_squared
 
@@ -521,26 +629,28 @@ class Player:
             else:
                 t = 0.0
 
-            # Closest point
+            # Calculate closest point
             closest_x = px + t * dx
             closest_y = py + t * dy
             closest_z = pz + t * dz
 
-            # Distance to tesseract centear
+            # Calculate squared distance
             distance_squared = (
                     (closest_x - tesseract.x) ** 2 +
                     (closest_y - tesseract.y) ** 2 +
                     (closest_z - tesseract.z) ** 2
             )
 
-            # Adjusted collision radius
+            # Combined collision radius
             collision_distance = (
                     self.bullet_collision_radius +
                     tesseract.radius + 0.15
             )
 
-            if distance_squared <= collision_distance ** 2:
-                self.level_map.tesseracts.remove(tesseract)
+            # Check collision
+            if distance_squared <= collision_distance * collision_distance:
+                # Remove the enemy without copying the list
+                tesseracts.pop(index)
 
                 self.enemies_destroyed += 1
 
@@ -551,7 +661,22 @@ class Player:
     # Cleanup code
     def cleanup(self):
 
-        # Release spaceship texture
+        # Stop bullet sound effect
+        if self.shoot_sound is not None:
+            self.shoot_sound.stop()
+            self.shoot_sound = None
+
+        # Delete player VBO
+        if self.player_vbo is not None:
+            glDeleteBuffers(1, [self.player_vbo])
+            self.player_vbo = None
+
+        # Delete bullet VBO
+        if self.bullet_vbo is not None:
+            glDeleteBuffers(1, [self.bullet_vbo])
+            self.bullet_vbo = None
+
+        # Release player texture
         if self.texture_id is not None:
             glDeleteTextures([self.texture_id])
             self.texture_id = None
