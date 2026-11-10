@@ -17,6 +17,7 @@ GAME_OVER = 3
 
 # MENU SOUNDTRACK
 MENU_MUSIC = "assets/soundtracks/astroid_belt.mp3"
+GAME_MUSIC = "assets/soundtracks/smoothcalamity.mp3"
 
 # INITIALISE OPENGL 2D MENU
 def setup_menu():

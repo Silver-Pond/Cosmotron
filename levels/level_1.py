@@ -270,94 +270,111 @@ class LevelMap:
 
     def __init__(self, level_data=None):
 
-        if level_data is None:
-            level_data = map
-        self.map = level_data
+        self.map = level_data if level_data is not None else map
+
+        if not self.map:
+            raise ValueError("Level map cannot be empty.")
 
         self.rows = len(self.map)
         self.columns = len(self.map[0])
 
-        # MAP SETTINGS
-        # Each floor tile and wall occupies a 64x64 tile area
-        self.cell_size = 1.28
+        # Validate map dimensions
+        if any(len(row) != self.columns for row in self.map):
+            raise ValueError("All map rows must have the same number of columns.")
 
+        # Validate map tile values
+        valid_tiles = {0, 1, 2, 3, 4}
+
+        if any(tile not in valid_tiles for row in self.map for tile in row):
+            raise ValueError("Level map contains an invalid tile value.")
+
+        # MAP SETTINGS
+        self.cell_size = 1.28
         self.floor_y = -2.8
 
-        self.timer = 60.0  # 1 minute
+        self.timer = 60.0
         self.time_up = False
 
-        # PORTAL
-        self.portal = None
-
-        # Wall dimensions
-        self.wall_width = 1.28
-        self.wall_height = 1.28
-        self.wall_depth = 1.28
+        self.wall_width = self.cell_size
+        self.wall_height = self.cell_size
+        self.wall_depth = self.cell_size
 
         self.floor_colour = (0.0, 0.0, 0.0)
 
-        # DYNAMIC MAP LOADING SETTINGS
-        # Number of rows rendered ahead of player
+        # RENDER DISTANCE
         self.render_distance_ahead = 30
-
-        # Number of rows rendered behind player
         self.render_distance_behind = 3
 
-        # Current player position
         self.player_z = 0.0
 
-        # Cache wall positions
-        self.wall_positions = self.get_wall_positions()
+        # PRE-CALCULATED MAP COORDINATES
+        self.x_positions = [
+            (column - (self.columns - 1) / 2) * self.cell_size
+            for column in range(self.columns)
+        ]
 
-        # Load anomaly wall texture
+        self.z_positions = [
+            (row - (self.rows - 1) / 2) * self.cell_size
+            for row in range(self.rows)
+        ]
+
+        # CACHE WALL GRID POSITIONS
+        self.wall_cells = {
+            (row_index, column_index)
+            for row_index, row in enumerate(self.map)
+            for column_index, tile in enumerate(row)
+            if tile == 1
+        }
+
+        # LOAD WALL TEXTURE
         self.wall_texture = self.load_wall_texture()
 
-        self.wall_cells = set()
-
-        for wall_x, wall_z in self.wall_positions:
-            column = round(wall_x / self.cell_size + (self.columns - 1) / 2)
-            row = round(wall_z / self.cell_size + (self.rows - 1) / 2)
-
-            self.wall_cells.add((row, column))
-
-        # TESSERACT ENEMIES
+        # LOAD ENEMIES AND PORTAL
         self.tesseracts = []
         self.portal = None
 
         for row_index, row in enumerate(self.map):
 
+            world_z = self.z_positions[row_index]
+
             for col_index, tile in enumerate(row):
 
-                # Convert map coordinates into world coordinates
-                world_x = (col_index - (self.columns - 1) / 2) * self.cell_size
-                world_z = (row_index - (self.rows - 1) / 2) * self.cell_size
+                world_x = self.x_positions[col_index]
 
                 if tile == 2:
-                    # Standard cyan tesseract
+
                     self.tesseracts.append(
                         Tesseract(world_x, world_z, self)
                     )
 
                 elif tile == 3:
-                    # Purple tesseract
+
                     self.tesseracts.append(
                         PurpleTesseract(world_x, world_z, self)
                     )
 
                 elif tile == 4:
-                    # Level exit portal
+
+                    if self.portal is not None:
+                        raise ValueError(
+                            "A level can only contain one portal."
+                        )
+
                     self.portal = Portal(
                         world_x, world_z, self
                     )
 
-                print("Tesseracts loaded:", len(self.tesseracts))
+        # LOADING INFORMATION
+        print(f"Level loaded: {self.rows} rows x {self.columns} columns")
+        print(f"Walls loaded: {len(self.wall_cells)}")
+        print(f"Tesseracts loaded: {len(self.tesseracts)}")
 
-                if self.portal:
-                    print("Portal loaded:", self.portal.x, self.portal.z)
-                else:
-                    print("WARNING: No portal found in this level!")
-
-        print("Tesseracts loaded:", len(self.tesseracts))
+        if self.portal:
+            print(
+                f"Portal loaded: ({self.portal.x}, {self.portal.z})"
+            )
+        else:
+            print("WARNING: No portal found in this level!")
 
     # UPDATE PLAYER POSITION
     def update(self, player_z):
@@ -386,21 +403,25 @@ class LevelMap:
 
         return range(start_row, end_row)
 
-    # DRAW FLOOR TILE
-    def draw_floor_tile(self, x, z):
+    # DRAW ALL VISIBLE FLOOR TILES
+    def draw_floor(self, visible_rows):
 
         half = self.cell_size / 2
-
         y = self.floor_y
 
         glColor3f(*self.floor_colour)
 
         glBegin(GL_QUADS)
 
-        glVertex3f(x - half, y, z - half)
-        glVertex3f(x + half, y, z - half)
-        glVertex3f(x + half, y, z + half)
-        glVertex3f(x - half, y, z + half)
+        for row in visible_rows:
+
+            z = self.z_positions[row]
+
+            for x in self.x_positions:
+                glVertex3f(x - half, y, z - half)
+                glVertex3f(x + half, y, z - half)
+                glVertex3f(x + half, y, z + half)
+                glVertex3f(x - half, y, z + half)
 
         glEnd()
 
@@ -429,59 +450,71 @@ class LevelMap:
 
         return texture
 
-    # Draw wall cube
-    def draw_cube(self, x, y, z):
+    # DRAW ALL VISIBLE WALLS
+    def draw_walls(self, visible_rows):
 
-        half_width = self.wall_width / 2
-        half_height = self.wall_height / 2
-        half_depth = self.wall_depth / 2
+        half_w = self.wall_width / 2
+        half_h = self.wall_height / 2
+        half_d = self.wall_depth / 2
 
-        vertices = [
-            # Front
-            (x - half_width, y - half_height, z - half_depth),
-            (x + half_width, y - half_height, z - half_depth),
-            (x + half_width, y + half_height, z - half_depth),
-            (x - half_width, y + half_height, z - half_depth),
+        wall_y = self.floor_y + half_h
 
-            # Back
-            (x - half_width, y - half_height, z + half_depth),
-            (x + half_width, y - half_height, z + half_depth),
-            (x + half_width, y + half_height, z + half_depth),
-            (x - half_width, y + half_height, z + half_depth)
-        ]
+        # Face definitions
+        faces = (
+            (0, 1, 2, 3),
+            (4, 5, 6, 7),
+            (0, 4, 7, 3),
+            (1, 5, 6, 2),
+            (0, 1, 5, 4),
+            (3, 2, 6, 7)
+        )
 
-        faces = [
-            (0, 1, 2, 3),  # Front
-            (4, 5, 6, 7),  # Back
-            (0, 4, 7, 3),  # Left
-            (1, 5, 6, 2),  # Right
-            (0, 1, 5, 4),  # Bottom
-            (3, 2, 6, 7)  # Top
-        ]
-
-        # Texture coordinates
-        tex_coords = [
+        tex_coords = (
             (0.0, 0.0),
             (1.0, 0.0),
             (1.0, 1.0),
             (0.0, 1.0)
-        ]
+        )
 
-        # Enable texture
         glEnable(GL_TEXTURE_2D)
 
         glBindTexture(GL_TEXTURE_2D, self.wall_texture)
 
         glColor3f(1.0, 1.0, 1.0)
 
+        # One batch for every visible wall
         glBegin(GL_QUADS)
 
-        for face in faces:
+        for row in visible_rows:
 
-            for i, vertex in enumerate(face):
-                glTexCoord2f(*tex_coords[i])
+            z = self.z_positions[row]
 
-                glVertex3fv(vertices[vertex])
+            for column, tile in enumerate(self.map[row]):
+
+                if tile != 1:
+                    continue
+
+                x = self.x_positions[column]
+
+                # Cube vertices
+                vertices = (
+                    (x - half_w, wall_y - half_h, z - half_d),
+                    (x + half_w, wall_y - half_h, z - half_d),
+                    (x + half_w, wall_y + half_h, z - half_d),
+                    (x - half_w, wall_y + half_h, z - half_d),
+
+                    (x - half_w, wall_y - half_h, z + half_d),
+                    (x + half_w, wall_y - half_h, z + half_d),
+                    (x + half_w, wall_y + half_h, z + half_d),
+                    (x - half_w, wall_y + half_h, z + half_d)
+                )
+
+                for face in faces:
+
+                    for i, vertex_index in enumerate(face):
+                        glTexCoord2f(*tex_coords[i])
+
+                        glVertex3fv(vertices[vertex_index])
 
         glEnd()
 
@@ -489,35 +522,30 @@ class LevelMap:
 
         glDisable(GL_TEXTURE_2D)
 
-    # Draw Visible Map
+    # DRAW VISIBLE MAP
     def draw(self):
 
         glDisable(GL_TEXTURE_2D)
         glDisable(GL_LIGHTING)
 
+        # Calculate visible rows once
         visible_rows = self.get_visible_rows()
 
-        for row in visible_rows:
+        # Draw floor in one batch
+        self.draw_floor(visible_rows)
 
-            for column in range(self.columns):
+        # Draw walls in one batch
+        self.draw_walls(visible_rows)
 
-                x = (column - (self.columns - 1) / 2) * self.cell_size
-                z = (row - (self.rows - 1) / 2) * self.cell_size
+        # Draw visible enemies
+        self.draw_tesseracts(visible_rows)
 
-                self.draw_floor_tile(x, z)
-
-                if self.map[row][column] == 1:
-                    self.draw_cube(x, self.floor_y + self.wall_height / 2, z)
-
-        # Draw tesseracts once per frame
-        self.draw_tesseracts()
-
-        # Draw portal if its map row is visible
+        # Draw portal if visible
         if self.portal is not None:
 
-            portal_row = int(round(
+            portal_row = round(
                 self.portal.z / self.cell_size
-                + (self.rows - 1) / 2)
+                + (self.rows - 1) / 2
             )
 
             if portal_row in visible_rows:
@@ -547,46 +575,57 @@ class LevelMap:
             enemy.update(delta_time)
 
     # DRAW VISIBLE TESSERACTS
-    def draw_tesseracts(self):
-        visible_rows = self.get_visible_rows()
+    def draw_tesseracts(self, visible_rows=None):
+
+        if visible_rows is None:
+            visible_rows = self.get_visible_rows()
+
+        start_row = visible_rows.start
+        end_row = visible_rows.stop
 
         for enemy in self.tesseracts:
-            enemy_row = int(round(
-                enemy.z / self.cell_size + (self.rows - 1) / 2
-            ))
 
-            if enemy_row in visible_rows:
+            enemy_row = round(
+                enemy.z / self.cell_size
+                + (self.rows - 1) / 2
+            )
+
+            if start_row <= enemy_row < end_row:
                 enemy.draw()
 
-    # Player wall collider code
+    # WALL COLLISION DETECTION
     def collides_with_wall(self, x, z, player_radius):
-        """
-        Checks horizontal collision against nearby wall cubes.
-        Only checks the X and Z sides.
-        Ignores the top and bottom of walls.
-        """
 
         half_wall = self.cell_size / 2
+        radius_squared = player_radius ** 2
 
-        # Only inspect nearby grid cells.
+        center_column = round(
+            x / self.cell_size + (self.columns - 1) / 2
+        )
+
+        center_row = round(
+            z / self.cell_size + (self.rows - 1) / 2
+        )
+
         reach = int(player_radius / self.cell_size) + 1
 
-        center_column = round(x / self.cell_size + (self.columns - 1) / 2)
-        center_row = round(z / self.cell_size + (self.rows - 1) / 2)
+        min_column = max(0, center_column - reach)
+        max_column = min(self.columns - 1, center_column + reach)
 
-        radius_squared = player_radius * player_radius
+        min_row = max(0, center_row - reach)
+        max_row = min(self.rows - 1, center_row + reach)
 
-        for row in range(center_row - reach, center_row + reach + 1):
+        for row in range(min_row, max_row + 1):
 
-            for column in range(center_column - reach, center_column + reach + 1):
+            for column in range(min_column, max_column + 1):
 
                 if (row, column) not in self.wall_cells:
                     continue
 
-                wall_x = (column - (self.columns - 1) / 2) * self.cell_size
-                wall_z = (row - (self.rows - 1) / 2) * self.cell_size
+                wall_x = self.x_positions[column]
+                wall_z = self.z_positions[row]
 
-                # Find the closest point on the wall's XZ footprint.
+                # Closest point on the wall
                 closest_x = max(
                     wall_x - half_wall,
                     min(x, wall_x + half_wall)
