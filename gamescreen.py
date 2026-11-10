@@ -190,13 +190,13 @@ def draw_controls():
     glEnd()
 
     # Control labels - compact bottom-left layout
-    draw_text("CONTROLS", panel_x + 12, panel_y + panel_height - 25,
+    draw_text("CONTROLS", panel_x + 12, panel_y + panel_height - 115,
               18, (50, 180, 255))
 
-    draw_text("W  -  Accelerate", panel_x + 12, panel_y + panel_height - 50, 15)
-    draw_text("A  -  Move Left", panel_x + 12, panel_y + panel_height - 72, 15)
-    draw_text("D  -  Move Right", panel_x + 12, panel_y + panel_height - 94, 15)
-    draw_text("SPACE  -  Shoot", panel_x + 12, panel_y + panel_height - 116, 15)
+    draw_text("W  -  Accelerate", panel_x + 12, panel_y + panel_height - 90, 15)
+    draw_text("A  -  Move Left", panel_x + 12, panel_y + panel_height - 68, 15)
+    draw_text("D  -  Move Right", panel_x + 12, panel_y + panel_height - 46, 15)
+    draw_text("SPACE  -  Shoot", panel_x + 12, panel_y + panel_height - 24, 15)
 
     # Restore OpenGL state and matrices
     glDisable(GL_BLEND)
