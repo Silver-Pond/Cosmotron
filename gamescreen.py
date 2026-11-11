@@ -627,7 +627,7 @@ def run_game():
 
                 # Reset player position to the center of the new map
                 player.x = 0.0
-                player.z = 0.0
+                player.z = 300.0
 
                 # Continue with the next level
                 continue
