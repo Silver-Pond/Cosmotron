@@ -146,7 +146,7 @@ class Player:
         self.bullets = []
 
         self.bullet_speed = 40.0
-        self.bullet_cooldown = 0.2
+        self.bullet_cooldown = 0.3
         self.bullet_timer = 0.0
         self.bullet_scale = 0.2
         self.max_bullets = 10

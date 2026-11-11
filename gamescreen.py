@@ -568,17 +568,32 @@ def run_game():
         # Update player
         player.update(keys, delta_time)
 
+        # Check bullets against destructible walls
+        level.check_bullet_wall_collision(player)
+
         # Update tesseract animations
         level.update_tesseracts(delta_time)
 
         # Update portal animation
         level.update_portal(delta_time)
 
+        # Update black-hole animations
+        level.update_black_holes(delta_time)
+
         # Update countdown timer
         level.update_timer(delta_time)
 
         # Check collision between player and tesseracts
         player.check_tesseract_collision(level.tesseracts)
+
+        # Check collision with black holes
+        for black_hole in level.black_holes:
+
+            if black_hole.check_collision(player):
+                print("PLAYER DESTROYED BY BLACK HOLE!")
+
+                player.dead = True
+                break
 
         # End the game when the player has no lives left
         # Check game over conditions
@@ -588,7 +603,7 @@ def run_game():
             break
 
         elif level.time_up:
-            game_over_reason = "TIME HAS RUN OUT!"
+            game_over_reason = "    TIME HAS RUN OUT!   "
             running = False
             break
 
