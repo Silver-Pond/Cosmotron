@@ -406,14 +406,28 @@ class Player:
                     progress = step / steps
                     check_z = previous_z + ((bullet["z"] - previous_z) * progress)
 
-                    if self.level_map.collides_with_wall(
-                            bullet["x"], check_z,
-                            self.bullet_collision_radius):
+                    # Check destructible walls first
+                    destroyed_wall = self.level_map.check_destructible_wall_collision(
+                        bullet["x"],
+                        check_z,
+                        self.bullet_collision_radius
+                    )
+
+                    if destroyed_wall:
                         hit_wall = True
                         break
 
-            if hit_wall:
-                continue
+                    # Check normal, indestructible walls
+                    if self.level_map.collides_with_wall(
+                            bullet["x"],
+                            check_z,
+                            self.bullet_collision_radius):
+                        # Only remove the bullet if it hit a normal wall
+                        hit_wall = True
+                        break
+
+                if hit_wall:
+                    continue
 
             # BULLET LIFETIME / ARENA LIMIT
             if bullet["z"] > -200:

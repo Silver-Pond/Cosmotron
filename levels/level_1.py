@@ -484,15 +484,15 @@ map2 = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -739,9 +739,9 @@ map3 = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -830,7 +830,7 @@ class LevelMap:
 
         # LOAD WALL TEXTURES
         self.wall_texture = self.load_wall_texture()
-        self.breakable_wall_texture = self.load_breakable_wall_texture(self)
+        self.breakable_wall_texture = self.load_breakable_wall_texture()
 
         # LOAD ENEMIES AND PORTAL
         self.tesseracts = []
@@ -1068,8 +1068,8 @@ class LevelMap:
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.breakable_wall_texture)
 
-        # Give destructible walls a reddish tint
-        glColor3f(1.0, 0.35, 0.35)
+        # Give destructible walls a no tint
+        glColor3f(1.0, 1.0, 1.0)
 
         glBegin(GL_QUADS)
 
@@ -1104,7 +1104,7 @@ class LevelMap:
         glBindTexture(GL_TEXTURE_2D, 0)
         glDisable(GL_TEXTURE_2D)
 
-        # Restore normal wall colour
+        # Restore normal wall color
         glColor3f(1.0, 1.0, 1.0)
 
     # DRAW VISIBLE MAP
@@ -1121,6 +1121,9 @@ class LevelMap:
 
         # Draw walls in one batch
         self.draw_walls(visible_rows)
+
+        # Draw destructible walls
+        self.draw_destructible_walls(visible_rows)
 
         # Draw visible enemies
         self.draw_tesseracts(visible_rows)
@@ -1253,6 +1256,63 @@ class LevelMap:
 
         return False
 
+    def check_destructible_wall_collision(self, x, z, bullet_radius):
+
+        half_wall = self.cell_size / 2
+
+        center_column = round(
+            x / self.cell_size + (self.columns - 1) / 2
+        )
+
+        center_row = round(
+            z / self.cell_size + (self.rows - 1) / 2
+        )
+
+        reach = int(bullet_radius / self.cell_size) + 1
+
+        min_column = max(0, center_column - reach)
+        max_column = min(self.columns - 1, center_column + reach)
+
+        min_row = max(0, center_row - reach)
+        max_row = min(self.rows - 1, center_row + reach)
+
+        for row in range(min_row, max_row + 1):
+
+            for column in range(min_column, max_column + 1):
+
+                if (row, column) not in self.destructible_walls:
+                    continue
+
+                wall_x = self.x_positions[column]
+                wall_z = self.z_positions[row]
+
+                closest_x = max(
+                    wall_x - half_wall,
+                    min(x, wall_x + half_wall)
+                )
+
+                closest_z = max(
+                    wall_z - half_wall,
+                    min(z, wall_z + half_wall)
+                )
+
+                dx = x - closest_x
+                dz = z - closest_z
+
+                if dx * dx + dz * dz <= bullet_radius ** 2:
+                    # Remove the destructible wall
+                    self.destructible_walls.remove((row, column))
+                    self.map[row][column] = 0
+
+                    print(
+                        f"DESTRUCTIBLE WALL DESTROYED: "
+                        f"row={row}, column={column}"
+                    )
+
+                    return True
+
+        return False
+
     # CHECK PORTAL COLLISION
     def check_portal_collision(self, player):
         if self.portal is None:
@@ -1266,79 +1326,85 @@ class LevelMap:
         remaining_bullets = []
 
         half_wall = self.cell_size / 2
-
-        bullet_radius = getattr(
-            player, "bullet_collision_radius", 0.15
-        )
+        bullet_radius = getattr(player, "bullet_collision_radius", 0.15)
 
         for bullet in player.bullets:
 
-            bullet_x = bullet["x"]
-            bullet_z = bullet["z"]
+            # Previous and current bullet positions
+            start_x = bullet.get("prev_x", bullet["x"])
+            start_y = bullet.get("prev_y", bullet["y"])
+            start_z = bullet.get("prev_z", bullet["z"])
+
+            end_x = bullet["x"]
+            end_y = bullet["y"]
+            end_z = bullet["z"]
 
             hit_wall = False
 
-            # Find the nearest map cell
-            center_column = round(
-                bullet_x / self.cell_size
-                + (self.columns - 1) / 2
-            )
+            for row, column in list(self.destructible_walls):
 
-            center_row = round(
-                bullet_z / self.cell_size
-                + (self.rows - 1) / 2
-            )
+                wall_x = self.x_positions[column]
+                wall_z = self.z_positions[row]
 
-            # Check nearby cells
-            for row in range(
-                    max(0, center_row - 1),
-                    min(self.rows, center_row + 2)
-            ):
+                # Wall boundaries, expanded by bullet radius
+                min_x = wall_x - half_wall - bullet_radius
+                max_x = wall_x + half_wall + bullet_radius
 
-                for column in range(
-                        max(0, center_column - 1),
-                        min(self.columns, center_column + 2)
-                ):
+                min_y = self.floor_y - bullet_radius
+                max_y = self.floor_y + self.wall_height + bullet_radius
 
-                    if (row, column) not in self.destructible_walls:
-                        continue
+                min_z = wall_z - half_wall - bullet_radius
+                max_z = wall_z + half_wall + bullet_radius
 
-                    wall_x = self.x_positions[column]
-                    wall_z = self.z_positions[row]
+                # Segment intersection test
+                t_min = 0.0
+                t_max = 1.0
 
-                    # Check bullet against wall bounds
-                    closest_x = max(
-                        wall_x - half_wall,
-                        min(bullet_x, wall_x + half_wall)
-                    )
+                start = (start_x, start_y, start_z)
+                end = (end_x, end_y, end_z)
 
-                    closest_z = max(
-                        wall_z - half_wall,
-                        min(bullet_z, wall_z + half_wall)
-                    )
+                bounds = (
+                    (min_x, max_x),
+                    (min_y, max_y),
+                    (min_z, max_z)
+                )
 
-                    dx = bullet_x - closest_x
-                    dz = bullet_z - closest_z
+                for axis in range(3):
 
-                    if dx * dx + dz * dz <= bullet_radius ** 2:
-                        # Destroy wall
-                        self.destructible_walls.remove(
-                            (row, column)
-                        )
+                    direction = end[axis] - start[axis]
 
-                        # Update original map
-                        self.map[row][column] = 0
+                    if abs(direction) < 0.000001:
 
-                        hit_wall = True
+                        if not (bounds[axis][0] <= start[axis] <= bounds[axis][1]):
+                            t_min = 2.0
+                            break
 
-                        print("DESTRUCTIBLE WALL DESTROYED!")
+                    else:
 
-                        break
+                        t1 = (bounds[axis][0] - start[axis]) / direction
+                        t2 = (bounds[axis][1] - start[axis]) / direction
 
-                if hit_wall:
+                        if t1 > t2:
+                            t1, t2 = t2, t1
+
+                        t_min = max(t_min, t1)
+                        t_max = min(t_max, t2)
+
+                        if t_min > t_max:
+                            break
+
+                if t_min <= t_max:
+                    # Destroy the wall
+                    self.destructible_walls.remove((row, column))
+                    self.map[row][column] = 0
+
+                    hit_wall = True
+
+                    print(f"DESTRUCTIBLE WALL DESTROYED: row={row}, column={column}")
+
                     break
 
-            # Keep bullets that did not hit a destructible wall
+            # Remove bullets that hit a breakable wall
             if not hit_wall:
                 remaining_bullets.append(bullet)
 
@@ -1383,6 +1449,11 @@ class LevelMap:
         if self.wall_texture:
             glDeleteTextures([self.wall_texture])
             self.wall_texture = None
+
+        # Delete destructible wall texture
+        if self.breakable_wall_texture:
+            glDeleteTextures([self.breakable_wall_texture])
+            self.breakable_wall_texture = None
 
 """
 REFERENCE LIST

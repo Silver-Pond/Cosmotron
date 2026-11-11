@@ -568,9 +568,6 @@ def run_game():
         # Update player
         player.update(keys, delta_time)
 
-        # Check bullets against destructible walls
-        level.check_bullet_wall_collision(player)
-
         # Update tesseract animations
         level.update_tesseracts(delta_time)
 
