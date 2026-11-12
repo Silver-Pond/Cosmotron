@@ -4,7 +4,7 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from player.player import Player
-from levels.level_1 import LevelMap, LEVEL_MAPS
+from levels.levels import LevelMap, LEVEL_MAPS
 
 # MENU SETTINGS
 WIDTH = 1000
