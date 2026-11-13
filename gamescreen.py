@@ -14,6 +14,7 @@ MENU = 0
 GAME = 1
 EXIT = 2
 GAME_OVER = 3
+GAME_COMPLETED = 4
 
 # MENU SOUNDTRACK
 MENU_MUSIC = "assets/soundtracks/astroid_belt.mp3"
@@ -494,6 +495,121 @@ def game_over_screen(player, level, reason):
 
         clock.tick(60)
 
+# GAME COMPLETED SCREEN
+def game_completed_screen(player):
+
+    setup_menu()
+
+    clock = pygame.time.Clock()
+
+    while True:
+
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                return EXIT
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_RETURN:
+                    return MENU
+
+                if event.key == pygame.K_ESCAPE:
+                    return EXIT
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+                if event.button == 1:
+
+                    mouse_x, mouse_y = event.pos
+
+                    # MAIN MENU BUTTON
+                    if 350 <= mouse_x <= 650:
+                        if 460 <= mouse_y <= 530:
+                            return MENU
+
+                    # QUIT BUTTON
+                    if 350 <= mouse_x <= 650:
+                        if 550 <= mouse_y <= 620:
+                            return EXIT
+
+        # Clear screen
+        glClearColor(0.01, 0.01, 0.08, 1.0)
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        glLoadIdentity()
+
+        # Background
+        glColor3f(0.01, 0.02, 0.10)
+
+        glBegin(GL_QUADS)
+
+        glVertex2f(0, 0)
+        glVertex2f(WIDTH, 0)
+        glVertex2f(WIDTH, HEIGHT)
+        glVertex2f(0, HEIGHT)
+
+        glEnd()
+
+        # COMPLETION TITLE
+        draw_text(
+            "MISSION COMPLETED!",
+            150, 150, 90,
+            (50, 220, 255)
+        )
+
+        # Congratulations message
+        draw_text(
+            "CONGRATULATIONS, PILOT!",
+            330, 270, 35,
+            (255, 255, 255)
+        )
+
+        draw_text(
+            "You have successfully completed all levels.",
+            295, 325, 28,
+            (180, 210, 255)
+        )
+
+        # Final statistics
+        draw_text(
+            f"Enemies Destroyed: {player.enemies_destroyed}",
+            390, 390, 30,
+            (100, 255, 150)
+        )
+
+        # MAIN MENU BUTTON
+        draw_button(
+            "MAIN MENU",
+            350, 460,
+            300, 70,
+            mouse_pos,
+            font_size=35
+        )
+
+        # QUIT BUTTON
+        draw_button(
+            "QUIT GAME",
+            350, 550,
+            300, 70,
+            mouse_pos,
+            font_size=35
+        )
+
+        # Instructions
+        draw_text(
+            "Press ENTER for the main menu",
+            380, 650, 22,
+            (150, 170, 200)
+        )
+
+        pygame.display.flip()
+
+        clock.tick(60)
+
 # GAME
 def run_game():
 
@@ -600,7 +716,7 @@ def run_game():
             break
 
         elif level.time_up:
-            game_over_reason = "    TIME HAS RUN OUT!   "
+            game_over_reason = "----TIME HAS RUN OUT!---"
             running = False
             break
 
@@ -687,7 +803,9 @@ def run_game():
 
     # All levels completed
     if completed_all_levels:
-        return MENU
+        print("DISPLAYING GAME COMPLETED SCREEN!")
+
+        return game_completed_screen(player)
 
     # ESC pressed - return to main menu
     return MENU
